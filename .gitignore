@@ -4,7 +4,9 @@
 /node_modules
 /.pnp
 .pnp.js
-
+/amplify
+/.vscode
+/.expo
 # testing
 /coverage
 
@@ -33,6 +35,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#extras
+/amplify
+/.vscode
+/.expo
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend

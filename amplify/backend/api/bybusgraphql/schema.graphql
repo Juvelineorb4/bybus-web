@@ -1,3 +1,22 @@
+type TasaCambio
+  @model
+  @auth(
+    rules: [
+      { allow: public, provider: iam }
+      { allow: private, provider: iam }
+      { allow: groups, groups: ["admin", "sp"] }
+    ]
+  ) {
+  id: ID!
+  price: Float!
+    @index(
+      name: "TasaCambiosByDate"
+      queryField: "TasaCambiosByDate"
+      sortKeyFields: ["createdAt"]
+    )
+  createdAt: String!
+}
+
 type EmailSusbcription
   @model
   @auth(
@@ -21,6 +40,7 @@ type AgencySubscription
     rules: [
       { allow: public, provider: iam }
       { allow: private, provider: iam }
+      { allow: private }
       { allow: groups, groups: ["admin", "sp"] }
     ]
   ) {
@@ -382,6 +402,7 @@ type Ticket
   id: ID!
   code: String
   bookingID: ID @index(name: "byBookingToTicket")
+  booking: Booking @belongsTo(fields: ["bookingID"])
   orderDetailID: ID @index(name: "byOrderDetailToTickets")
   stop: ID @index(name: "byStopBookingToTicket")
   customerID: ID
@@ -445,7 +466,7 @@ type OrderDetail
   customerDocument: String
   customerName: String
   customerEmail: String
-  total: Int
+  total: Float
   isGuest: Boolean
   status: String @default(value: "APPROVED")
   paymentID: ID
@@ -567,9 +588,21 @@ type Mutation {
     @auth(rules: [{ allow: groups, groups: ["admin", "sp"] }])
 }
 
+type Query {
+  getTodayTasaCambio: String
+    @function(name: "getTodayTasaCambio-${env}")
+    @auth(
+      rules: [
+        { allow: public, provider: iam }
+        { allow: private, provider: iam }
+      ]
+    )
+}
+
 input CheckScanInput {
   ticketID: ID
   bookingID: ID
+  ordenDetailID: ID
 }
 
 input RegisterUserInput {
