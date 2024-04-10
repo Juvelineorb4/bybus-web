@@ -90,17 +90,50 @@ export const handler = async (event) => {
     2. si la creacion no es para reprogramar entonces se crea un solo viaje 
     3.si no hay que crear varios viajes dependiendo del reprogram.date
   */
-  // Obtenemos los parametros
-  const { owner, reprogram, booking } = JSON.parse(event.arguments.input);
-  const resultAgency = await CUSTOM_API_GRAPHQL(getAgency, {
-    id: booking?.agencyID,
-  });
-  console.log("PORCENTAJE: ", resultAgency);
-  const percentage = resultAgency?.data?.getAgency?.percentage;
-  let price = parseFloat(booking?.price);
-  if (isNaN(price)) throw new Error("PRECIO NO VALIDO");
-  // const totalPrice = price + (price * percentage) / 100;
-  const totalPrice = price;
+  try {
+    // Obtenemos los parametros
+    const { owner, reprogram, booking } = JSON.parse(event.arguments.input);
+    const resultAgency = await CUSTOM_API_GRAPHQL(getAgency, {
+      id: booking?.agencyID,
+    });
+    console.log("PORCENTAJE: ", resultAgency);
+    const percentage = resultAgency?.data?.getAgency?.percentage;
+    let price = parseFloat(booking?.price);
+    if (isNaN(price)) throw new Error("PRECIO NO VALIDO");
+    // const totalPrice = price + (price * percentage) / 100;
+    const totalPrice = price;
+
+    if (reprogram?.is) {
+      // Crear varios viajes
+    } else {
+      // Crear un solo viaje
+      const ID = uuidv4();
+      // obtenemos el codigo del viaje
+      const code = await GENERATE_CODE({ id: ID, booking });
+      const resultCreate = await CUSTOM_API_GRAPHQL(createBooking, {
+        input: {
+          id: ID,
+          code,
+          ...booking,
+          price: totalPrice,
+          percentage: percentage,
+          owner: owner,
+        },
+      });
+      console.log("VIAJE CREADO: ", resultCreate);
+    }
+
+    return JSON.stringify({
+      statusCode: 200,
+      body: { message: "CREACION DE VIAJES EXITOSO" },
+    });
+  } catch (error) {
+    return JSON.stringify({
+      statusCode: 500,
+      message: "Error al crear el viaje.",
+      error: error,
+    });
+  }
 
   if (reprogram?.is) {
     // Viene una creacion devarios bookings
@@ -168,28 +201,8 @@ export const handler = async (event) => {
   } else {
     // solo se crea uno
     // // creamos el viaje
-
     // obtenemos el id del viaje
-    const ID = uuidv4();
-    // obtenemos el codigo del viaje
-    const code = await GENERATE_CODE({ id: ID, booking });
-    const resultCreate = await CUSTOM_API_GRAPHQL(createBooking, {
-      input: {
-        id: ID,
-        code,
-        ...booking,
-        price: totalPrice,
-        percentage: percentage,
-        owner: owner,
-      },
-    });
-    console.log("RESULTADO UNO: ", resultCreate);
   }
-
-  return JSON.stringify({
-    statusCode: 200,
-    body: "CREACION DE VIAJES EXITOSO",
-  });
 };
 
 const GENERATE_CODE = async (data) => {
@@ -219,31 +232,35 @@ const GENERATE_CODE = async (data) => {
 };
 
 const CUSTOM_API_GRAPHQL = async (query, variables = {}) => {
-  const endpoint = new URL(GRAPHQL_ENDPOINT);
-  let bodyContent = JSON.stringify({ query });
-  if (variables) bodyContent = JSON.stringify({ query, variables });
-  const signer = new SignatureV4({
-    credentials: defaultProvider(),
-    region: AWS_REGION,
-    service: "appsync",
-    sha256: Sha256,
-  });
+  try {
+    const endpoint = new URL(GRAPHQL_ENDPOINT);
+    let bodyContent = JSON.stringify({ query });
+    if (variables) bodyContent = JSON.stringify({ query, variables });
+    const signer = new SignatureV4({
+      credentials: defaultProvider(),
+      region: AWS_REGION,
+      service: "appsync",
+      sha256: Sha256,
+    });
 
-  const requestToBeSigned = new HttpRequest({
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      host: endpoint.host,
-    },
-    hostname: endpoint.host,
-    body: bodyContent,
-    path: endpoint.pathname,
-  });
+    const requestToBeSigned = new HttpRequest({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        host: endpoint.host,
+      },
+      hostname: endpoint.host,
+      body: bodyContent,
+      path: endpoint.pathname,
+    });
 
-  const signed = await signer.sign(requestToBeSigned);
+    const signed = await signer.sign(requestToBeSigned);
 
-  const request = new Request(endpoint, signed);
-  const response = await fetch(request);
-  const result = await response.json();
-  return result;
+    const request = new Request(endpoint, signed);
+    const response = await fetch(request);
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    throw new Error({ message: error });
+  }
 };

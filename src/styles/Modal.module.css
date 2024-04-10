@@ -7,7 +7,7 @@
 .content {
   padding: 2rem;
   background-color: var(--white);
-  height: 450px;
+  height: 550px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -61,4 +61,24 @@
 }
 .textfield {
   font-size: 12px;
+}
+
+.inputImage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+.imageSelect {
+  height: 152px;
+  width: 152px;
+  border: 1px dashed #2f2f2f;
+}
+.imageNothing {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  width: 150px;
+  border: 1px dashed #2f2f2f;
 }
