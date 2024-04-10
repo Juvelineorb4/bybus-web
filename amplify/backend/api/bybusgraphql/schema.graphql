@@ -154,7 +154,7 @@ type AgencyHistory
       { allow: owner, operations: [read, update] }
       { allow: public, provider: iam }
       { allow: private, provider: iam }
-      { allow: groups, groups: ["admin", "sp"] }
+      { allow: groups, groups: ["admin", "sp","agency"] }
     ]
   ) {
   id: ID!
