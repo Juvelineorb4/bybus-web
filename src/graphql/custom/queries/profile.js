@@ -19,6 +19,7 @@ export const getAgency = /* GraphQL */ `
           agencyID
           officeID
           lastConnection
+          status
           createdAt
           updatedAt
           __typename

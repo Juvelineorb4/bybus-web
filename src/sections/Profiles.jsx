@@ -211,12 +211,14 @@ const Profiles = ({ error }) => {
                 agencyID={userAuth?.attributes["custom:agencyID"]}
               />
             )}
+            {/* <div> */}
+
             {employees?.length > 0 &&
-              employees.map((item, index) => (
-                <>
-                  {item?.type === "OFFICE" && (
-                    <>
-                      {console.log("EMPELADO: ", item)}
+              employees.map(
+                (item, index) =>
+                  item?.type === "OFFICE" &&
+                  item.status !== "DISABLED" && (
+                    <div>
                       <AccountEmployee
                         onHandleProfileClick={onHandleProfileClick}
                         name={item.name}
@@ -224,10 +226,10 @@ const Profiles = ({ error }) => {
                         key={`${index}-acc`}
                         data={item}
                       />
-                    </>
-                  )}
-                </>
-              ))}
+                    </div>
+                  )
+              )}
+            {/* </div> */}
           </div>
         )}
       </div>
