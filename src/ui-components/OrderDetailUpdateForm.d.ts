@@ -22,7 +22,7 @@ export declare type OrderDetailUpdateFormInputValues = {
     customerEmail?: string;
     total?: number;
     isGuest?: boolean;
-    bookingID?: string;
+    status?: string;
     userID?: string;
 };
 export declare type OrderDetailUpdateFormValidationValues = {
@@ -34,7 +34,7 @@ export declare type OrderDetailUpdateFormValidationValues = {
     customerEmail?: ValidationFunction<string>;
     total?: ValidationFunction<number>;
     isGuest?: ValidationFunction<boolean>;
-    bookingID?: ValidationFunction<string>;
+    status?: ValidationFunction<string>;
     userID?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -48,7 +48,7 @@ export declare type OrderDetailUpdateFormOverridesProps = {
     customerEmail?: PrimitiveOverrideProps<TextFieldProps>;
     total?: PrimitiveOverrideProps<TextFieldProps>;
     isGuest?: PrimitiveOverrideProps<SwitchFieldProps>;
-    bookingID?: PrimitiveOverrideProps<TextFieldProps>;
+    status?: PrimitiveOverrideProps<TextFieldProps>;
     userID?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type OrderDetailUpdateFormProps = React.PropsWithChildren<{

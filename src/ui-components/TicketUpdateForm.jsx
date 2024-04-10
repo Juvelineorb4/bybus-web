@@ -25,8 +25,8 @@ export default function TicketUpdateForm(props) {
   } = props;
   const initialValues = {
     code: "",
+    orderDetailID: "",
     stop: "",
-    customerID: "",
     seating: "",
     status: "",
     description: "",
@@ -34,8 +34,10 @@ export default function TicketUpdateForm(props) {
     owner: "",
   };
   const [code, setCode] = React.useState(initialValues.code);
+  const [orderDetailID, setOrderDetailID] = React.useState(
+    initialValues.orderDetailID
+  );
   const [stop, setStop] = React.useState(initialValues.stop);
-  const [customerID, setCustomerID] = React.useState(initialValues.customerID);
   const [seating, setSeating] = React.useState(initialValues.seating);
   const [status, setStatus] = React.useState(initialValues.status);
   const [description, setDescription] = React.useState(
@@ -49,8 +51,8 @@ export default function TicketUpdateForm(props) {
       ? { ...initialValues, ...ticketRecord }
       : initialValues;
     setCode(cleanValues.code);
+    setOrderDetailID(cleanValues.orderDetailID);
     setStop(cleanValues.stop);
-    setCustomerID(cleanValues.customerID);
     setSeating(cleanValues.seating);
     setStatus(cleanValues.status);
     setDescription(cleanValues.description);
@@ -71,8 +73,8 @@ export default function TicketUpdateForm(props) {
   React.useEffect(resetStateValues, [ticketRecord]);
   const validations = {
     code: [],
+    orderDetailID: [],
     stop: [],
-    customerID: [],
     seating: [],
     status: [],
     description: [],
@@ -106,8 +108,8 @@ export default function TicketUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           code,
+          orderDetailID,
           stop,
-          customerID,
           seating,
           status,
           description,
@@ -169,8 +171,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code: value,
+              orderDetailID,
               stop,
-              customerID,
               seating,
               status,
               description,
@@ -191,6 +193,37 @@ export default function TicketUpdateForm(props) {
         {...getOverrideProps(overrides, "code")}
       ></TextField>
       <TextField
+        label="Order detail id"
+        isRequired={false}
+        isReadOnly={false}
+        value={orderDetailID}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              code,
+              orderDetailID: value,
+              stop,
+              seating,
+              status,
+              description,
+              url,
+              owner,
+            };
+            const result = onChange(modelFields);
+            value = result?.orderDetailID ?? value;
+          }
+          if (errors.orderDetailID?.hasError) {
+            runValidationTasks("orderDetailID", value);
+          }
+          setOrderDetailID(value);
+        }}
+        onBlur={() => runValidationTasks("orderDetailID", orderDetailID)}
+        errorMessage={errors.orderDetailID?.errorMessage}
+        hasError={errors.orderDetailID?.hasError}
+        {...getOverrideProps(overrides, "orderDetailID")}
+      ></TextField>
+      <TextField
         label="Stop"
         isRequired={false}
         isReadOnly={false}
@@ -200,8 +233,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop: value,
-              customerID,
               seating,
               status,
               description,
@@ -222,37 +255,6 @@ export default function TicketUpdateForm(props) {
         {...getOverrideProps(overrides, "stop")}
       ></TextField>
       <TextField
-        label="Customer id"
-        isRequired={false}
-        isReadOnly={false}
-        value={customerID}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              code,
-              stop,
-              customerID: value,
-              seating,
-              status,
-              description,
-              url,
-              owner,
-            };
-            const result = onChange(modelFields);
-            value = result?.customerID ?? value;
-          }
-          if (errors.customerID?.hasError) {
-            runValidationTasks("customerID", value);
-          }
-          setCustomerID(value);
-        }}
-        onBlur={() => runValidationTasks("customerID", customerID)}
-        errorMessage={errors.customerID?.errorMessage}
-        hasError={errors.customerID?.hasError}
-        {...getOverrideProps(overrides, "customerID")}
-      ></TextField>
-      <TextField
         label="Seating"
         isRequired={false}
         isReadOnly={false}
@@ -262,8 +264,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop,
-              customerID,
               seating: value,
               status,
               description,
@@ -293,8 +295,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop,
-              customerID,
               seating,
               status: value,
               description,
@@ -324,8 +326,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop,
-              customerID,
               seating,
               status,
               description: value,
@@ -355,8 +357,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop,
-              customerID,
               seating,
               status,
               description,
@@ -386,8 +388,8 @@ export default function TicketUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               code,
+              orderDetailID,
               stop,
-              customerID,
               seating,
               status,
               description,

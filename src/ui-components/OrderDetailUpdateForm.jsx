@@ -39,7 +39,7 @@ export default function OrderDetailUpdateForm(props) {
     customerEmail: "",
     total: "",
     isGuest: false,
-    bookingID: "",
+    status: "",
     userID: "",
   };
   const [amount, setAmount] = React.useState(initialValues.amount);
@@ -60,7 +60,7 @@ export default function OrderDetailUpdateForm(props) {
   );
   const [total, setTotal] = React.useState(initialValues.total);
   const [isGuest, setIsGuest] = React.useState(initialValues.isGuest);
-  const [bookingID, setBookingID] = React.useState(initialValues.bookingID);
+  const [status, setStatus] = React.useState(initialValues.status);
   const [userID, setUserID] = React.useState(initialValues.userID);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -75,7 +75,7 @@ export default function OrderDetailUpdateForm(props) {
     setCustomerEmail(cleanValues.customerEmail);
     setTotal(cleanValues.total);
     setIsGuest(cleanValues.isGuest);
-    setBookingID(cleanValues.bookingID);
+    setStatus(cleanValues.status);
     setUserID(cleanValues.userID);
     setErrors({});
   };
@@ -100,7 +100,7 @@ export default function OrderDetailUpdateForm(props) {
     customerEmail: [],
     total: [],
     isGuest: [],
-    bookingID: [],
+    status: [],
     userID: [],
   };
   const runValidationTasks = async (
@@ -137,7 +137,7 @@ export default function OrderDetailUpdateForm(props) {
           customerEmail,
           total,
           isGuest,
-          bookingID,
+          status,
           userID,
         };
         const validationResponses = await Promise.all(
@@ -206,7 +206,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -239,7 +239,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -272,7 +272,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -321,7 +321,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -354,7 +354,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -387,7 +387,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail: value,
               total,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -411,9 +411,9 @@ export default function OrderDetailUpdateForm(props) {
         step="any"
         value={total}
         onChange={(e) => {
-          let value = isNaN(parseInt(e.target.value))
+          let value = isNaN(parseFloat(e.target.value))
             ? e.target.value
-            : parseInt(e.target.value);
+            : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
               amount,
@@ -424,7 +424,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total: value,
               isGuest,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -457,7 +457,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest: value,
-              bookingID,
+              status,
               userID,
             };
             const result = onChange(modelFields);
@@ -474,10 +474,10 @@ export default function OrderDetailUpdateForm(props) {
         {...getOverrideProps(overrides, "isGuest")}
       ></SwitchField>
       <TextField
-        label="Booking id"
+        label="Status"
         isRequired={false}
         isReadOnly={false}
-        value={bookingID}
+        value={status}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
@@ -490,21 +490,21 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID: value,
+              status: value,
               userID,
             };
             const result = onChange(modelFields);
-            value = result?.bookingID ?? value;
+            value = result?.status ?? value;
           }
-          if (errors.bookingID?.hasError) {
-            runValidationTasks("bookingID", value);
+          if (errors.status?.hasError) {
+            runValidationTasks("status", value);
           }
-          setBookingID(value);
+          setStatus(value);
         }}
-        onBlur={() => runValidationTasks("bookingID", bookingID)}
-        errorMessage={errors.bookingID?.errorMessage}
-        hasError={errors.bookingID?.hasError}
-        {...getOverrideProps(overrides, "bookingID")}
+        onBlur={() => runValidationTasks("status", status)}
+        errorMessage={errors.status?.errorMessage}
+        hasError={errors.status?.hasError}
+        {...getOverrideProps(overrides, "status")}
       ></TextField>
       <TextField
         label="User id"
@@ -523,7 +523,7 @@ export default function OrderDetailUpdateForm(props) {
               customerEmail,
               total,
               isGuest,
-              bookingID,
+              status,
               userID: value,
             };
             const result = onChange(modelFields);

@@ -5,12 +5,16 @@
  **************************************************************************/
 
 export { default as studioTheme } from "./studioTheme";
+export { default as TasaCambioCreateForm } from "./TasaCambioCreateForm";
+export { default as TasaCambioUpdateForm } from "./TasaCambioUpdateForm";
 export { default as EmailSusbcriptionCreateForm } from "./EmailSusbcriptionCreateForm";
 export { default as EmailSusbcriptionUpdateForm } from "./EmailSusbcriptionUpdateForm";
 export { default as AgencySubscriptionCreateForm } from "./AgencySubscriptionCreateForm";
 export { default as AgencySubscriptionUpdateForm } from "./AgencySubscriptionUpdateForm";
 export { default as AgencyCreateForm } from "./AgencyCreateForm";
 export { default as AgencyUpdateForm } from "./AgencyUpdateForm";
+export { default as AgencyHistoryCreateForm } from "./AgencyHistoryCreateForm";
+export { default as AgencyHistoryUpdateForm } from "./AgencyHistoryUpdateForm";
 export { default as OfficeCreateForm } from "./OfficeCreateForm";
 export { default as OfficeUpdateForm } from "./OfficeUpdateForm";
 export { default as StateCreateForm } from "./StateCreateForm";
@@ -19,6 +23,8 @@ export { default as EmployeeCreateForm } from "./EmployeeCreateForm";
 export { default as EmployeeUpdateForm } from "./EmployeeUpdateForm";
 export { default as TransportCreateForm } from "./TransportCreateForm";
 export { default as TransportUpdateForm } from "./TransportUpdateForm";
+export { default as ScheduleBookingCreateForm } from "./ScheduleBookingCreateForm";
+export { default as ScheduleBookingUpdateForm } from "./ScheduleBookingUpdateForm";
 export { default as CustomerCreateForm } from "./CustomerCreateForm";
 export { default as CustomerUpdateForm } from "./CustomerUpdateForm";
 export { default as TicketCreateForm } from "./TicketCreateForm";
