@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import { Button, TextField, CircularProgress } from "@mui/material";
 import styles from "@/styles/Modal.module.css";
-import { API } from "aws-amplify";
+import { API, Auth } from "aws-amplify";
 import { createAgency, registerAgencyAdmin } from "@/graphql/mutations";
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 export default function ModalAgency({ open, close }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +14,7 @@ export default function ModalAgency({ open, close }) {
   const [phone, setPhone] = useState("");
   const [imageName, setImageName] = useState("");
   const [image, setImage] = useState("");
+  const [base64, setBase64] = useState("");
   const [percentage, setPercentage] = useState(10);
 
   const reset = () => {
@@ -21,14 +22,16 @@ export default function ModalAgency({ open, close }) {
     setEmail("");
     setRif("");
     setPhone("");
+    setBase64("")
     setPercentage(10);
     setIsLoading(false);
-    setImage("")
-    setImageName("")
+    setImage("");
+    setImageName("");
     close();
   };
 
   const onHandleRegister = async () => {
+    const { identityId } = await Auth.currentUserCredentials();
     const params = {
       username: email,
       name: name,
@@ -36,8 +39,10 @@ export default function ModalAgency({ open, close }) {
       phone: phone,
       percentage: percentage,
       agencySubsTableID: "",
+      identityID: identityId,
+      base64Image: base64,
     };
-    console.log(params);
+    console.log("tamos", params);
     setIsLoading(true);
     try {
       // registrar agencia
@@ -151,6 +156,12 @@ export default function ModalAgency({ open, close }) {
 
                         if (e.target.files && e.target.files[0]) {
                           let img = URL.createObjectURL(e.target.files[0]);
+                          let reader = new FileReader();
+                          reader.onload = function (event) {
+                            let result = event.target.result;
+                            setBase64(result);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
                           setImage(img);
                         }
                       }}

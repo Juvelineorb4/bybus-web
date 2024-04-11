@@ -31,7 +31,7 @@
         },
         "createAdminAgency": {
           "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
-          "s3Key": "amplify-builds/createAdminAgency-654a2f615a65476f7151-build.zip"
+          "s3Key": "amplify-builds/createAdminAgency-4d454959754b7671646b-build.zip"
         },
         "createUserCognito": {
           "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
@@ -43,7 +43,7 @@
         },
         "scheduleBookingAgency": {
           "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
-          "s3Key": "amplify-builds/scheduleBookingAgency-4e584749647344525643-build.zip"
+          "s3Key": "amplify-builds/scheduleBookingAgency-56727632337732586b73-build.zip"
         },
         "sheduleBookingUpdate": {
           "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
@@ -52,6 +52,10 @@
         "triggerContactNotification": {
           "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
           "s3Key": "amplify-builds/triggerContactNotification-46584a4f6f356e5a4b31-build.zip"
+        },
+        "uploadAgencyImage": {
+          "deploymentBucketName": "amplify-bybus-stage-193751-deployment",
+          "s3Key": "amplify-builds/uploadAgencyImage-6a743474616a797a794a-build.zip"
         }
       },
       "storage": {

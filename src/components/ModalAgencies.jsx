@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import { Button, TextField, CircularProgress } from "@mui/material";
 import styles from "@/styles/Modal.module.css";
-import { API } from "aws-amplify";
-import { registerAgencyAdmin } from "@/graphql/mutations";
+import { API, Auth } from "aws-amplify";
+import { registerAgencyAdmin, uploadAgencyImage } from "@/graphql/mutations";
 import { updateAgency } from "@/graphql/custom/mutations";
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
@@ -17,6 +17,7 @@ export default function ModalAgencies({ open, close, data, type }) {
   const [phone, setPhone] = useState("");
   const [imageName, setImageName] = useState("");
   const [image, setImage] = useState("");
+  const [base64, setBase64] = useState("");
   const [percentage, setPercentage] = useState(
     data?.percentage ? data?.percentage : 10
   );
@@ -26,6 +27,7 @@ export default function ModalAgencies({ open, close, data, type }) {
     setName("");
     setEmail("");
     setRif("");
+    setBase64("")
     setPhone("");
     setTableID("");
     setPercentage(10);
@@ -55,6 +57,7 @@ export default function ModalAgencies({ open, close, data, type }) {
   };
 
   const onHandleRegister = async () => {
+    const { identityId } = await Auth.currentUserCredentials();
     const params = {
       username: email,
       name: name,
@@ -62,6 +65,8 @@ export default function ModalAgencies({ open, close, data, type }) {
       phone: phone,
       percentage: percentage,
       agencySubsTableID: tableID,
+      identityID: identityId,
+      base64Image: base64,
     };
     setIsLoading(true);
     try {
@@ -106,6 +111,7 @@ export default function ModalAgencies({ open, close, data, type }) {
   useEffect(() => {}, []);
 
   const onHandleEdit = async () => {
+    const { identityId } = await Auth.currentUserCredentials();
     console.log("listo ara editar");
     const params = {
       id: data?.id,
@@ -122,6 +128,16 @@ export default function ModalAgencies({ open, close, data, type }) {
         authMode: "AMAZON_COGNITO_USER_POOLS",
         variables: {
           input: params,
+        },
+      });
+      const image = API.graphql({
+        query: uploadAgencyImage,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          input: {
+            base64Image: base64,
+            identityID: identityId
+          },
         },
       });
     } catch (error) {
@@ -226,6 +242,12 @@ export default function ModalAgencies({ open, close, data, type }) {
 
                         if (e.target.files && e.target.files[0]) {
                           let img = URL.createObjectURL(e.target.files[0]);
+                          let reader = new FileReader();
+                          reader.onload = function (event) {
+                            let result = event.target.result;
+                            setBase64(result);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
                           setImage(img);
                         }
                       }}
