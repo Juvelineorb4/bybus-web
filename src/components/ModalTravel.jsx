@@ -10,6 +10,7 @@ import {
   Checkbox,
   ListItemText,
   OutlinedInput,
+  FormHelperText,
 } from "@mui/material";
 import styles from "@/styles/Modal.module.css";
 import { useState } from "react";
@@ -42,7 +43,12 @@ export default function ModalTravel({ open, close, offices }) {
   const [quantity, setQuantity] = useState("");
   const [percentage, setPercentage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  let fechaToday = new Date();
 
+  const dateToday = () => {
+    let fechaTodayHere = new Date();
+  };
   const officePercentage = async () => {
     const result = await API.graphql({
       query: queries.listAgencies,
@@ -80,6 +86,7 @@ export default function ModalTravel({ open, close, offices }) {
   });
   const [scheduleDate, setScheduleDate] = useState("");
   const resetModal = () => {
+    setError(false);
     setStopQ([]);
     setDeparture({
       ...departure,
@@ -177,34 +184,64 @@ export default function ModalTravel({ open, close, offices }) {
         week: selectWeek,
       },
     };
+    console.log(params);
+    // try {
+    //   const { data } = await API.graphql({
+    //     query: mutations.reprogram,
+    //     authMode: "AMAZON_COGNITO_USER_POOLS",
+    //     variables: { input: JSON.stringify(params) },
+    //   });
+    //   const result = JSON.parse(data?.reprogram);
 
-    try {
-      const { data } = await API.graphql({
-        query: mutations.reprogram,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-        variables: { input: JSON.stringify(params) },
-      });
-      const result = JSON.parse(data?.reprogram);
-
-      if (result?.status !== 200) {
-        throw new Error(`${result?.error}`);
-      }
-      resetModal();
-    } catch (error) {
-      console.log("EL ERROR:  ", error.Error);
-      alert(error);
-    }
+    //   if (result?.status !== 200) {
+    //     throw new Error(`toy aqui manito ${result?.error}`);
+    //   }
+    //   resetModal();
+    // } catch (error) {
+    //   console.log("EL ERROR:  ", error.Error);
+    //   alert(error);
+    // }
   };
 
   useEffect(() => {
+    // dateToday();
+    let fechaInitial = new Date().toISOString().slice(0, 10);
+    let fechaToday = new Date();
     officePercentage();
     setDeparture({
       ...departure,
       city: offices.city,
       address: offices.address,
       state: offices.state,
+      date: fechaInitial,
     });
-  }, [timeDeparture, timeArrival]);
+    setStartDate(fechaToday);
+    setEndDate(addDays(fechaToday, 7));
+    setMin(fechaToday);
+    setArrival({ ...arrival, date: fechaInitial });
+    let horas = fechaToday.getHours();
+    let minutos = fechaToday.getMinutes();
+    let ampm = horas >= 12 ? "PM" : "AM";
+    horas = horas % 12;
+    horas = horas ? horas : 12;
+    minutos = minutos < 10 ? "0" + minutos : minutos;
+    let strTiempo = horas + ":" + minutos + " " + ampm;
+    let minutosRedondeados = Math.round(minutos / 15) * 15;
+    if (minutosRedondeados >= 60) {
+      minutosRedondeados = `00`;
+    }
+    let horaFormateada =
+      horas < 10 ? `0${minutosRedondeados >= `00` ? horas + 1 : horas}` : `${horas}`;
+    
+    setTimeDeparture({
+      hour: horaFormateada,
+      minutes: minutosRedondeados,
+      mode: ampm,
+    });
+    console.log(horaFormateada);
+    console.log(minutosRedondeados);
+    console.log(ampm);
+  }, []);
 
   if (offices)
     return (
@@ -276,6 +313,7 @@ export default function ModalTravel({ open, close, offices }) {
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                           <div className={styles.date}>
                             <DatePicker
+                              onError={true}
                               onChange={(e) => {
                                 let fecha = new Date(e)
                                   .toISOString()
@@ -285,6 +323,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setEndDate(addDays(e, 7));
                                 setMin(e);
                               }}
+                              defaultValue={fechaToday}
                             />
                           </div>
                           <div className={styles.time}>
@@ -295,7 +334,7 @@ export default function ModalTravel({ open, close, offices }) {
                               <Select
                                 labelId="demo-simple-select-label"
                                 label="Hora"
-                                defaultValue="00:00"
+                                defaultValue={timeDeparture.hour}
                                 value={timeDeparture.hour}
                                 onChange={(e) =>
                                   setTimeDeparture({
@@ -318,6 +357,7 @@ export default function ModalTravel({ open, close, offices }) {
                               <Select
                                 labelId="demo-simple-select-label"
                                 label="Minutos"
+                                defaultValue={timeDeparture.minutes}
                                 value={timeDeparture.minutes}
                                 onChange={(e) =>
                                   setTimeDeparture({
@@ -340,6 +380,7 @@ export default function ModalTravel({ open, close, offices }) {
                               <Select
                                 labelId="demo-simple-select-label"
                                 label="Minutos"
+                                defaultValue={timeDeparture.mode}
                                 value={timeDeparture.mode}
                                 onChange={(e) =>
                                   setTimeDeparture({
@@ -363,14 +404,17 @@ export default function ModalTravel({ open, close, offices }) {
                     <div className={styles.arrival}>
                       <p>Llegada</p>
                       <div className={styles.form}>
-                        <FormControl fullWidth>
+                        <FormControl
+                          fullWidth
+                          error={arrival.state === "" && error ? true : false}
+                        >
                           <InputLabel id="demo-simple-select-label">
                             Estado
                           </InputLabel>
                           <Select
                             labelId="demo-simple-select-label"
                             value={arrival.state}
-                            label="Ciudad"
+                            label="Estado"
                             onChange={(e) =>
                               setArrival({ ...arrival, state: e.target.value })
                             }
@@ -381,8 +425,24 @@ export default function ModalTravel({ open, close, offices }) {
                               </MenuItem>
                             ))}
                           </Select>
+                          {arrival.state === "" && error && (
+                            <FormHelperText
+                              style={{
+                                color: "red",
+                                fontSize: "12px",
+                                position: "relative",
+                                top: -15,
+                                left: -14,
+                              }}
+                            >
+                              Selecciona el estado
+                            </FormHelperText>
+                          )}
                         </FormControl>
-                        <FormControl fullWidth>
+                        <FormControl
+                          fullWidth
+                          error={arrival.city === "" && error ? true : false}
+                        >
                           <InputLabel id="demo-simple-select-label">
                             Ciudad
                           </InputLabel>
@@ -412,12 +472,42 @@ export default function ModalTravel({ open, close, offices }) {
                               )
                             )}
                           </Select>
+                          {arrival.city === "" && error && (
+                            <FormHelperText
+                              style={{
+                                color: "red",
+                                fontSize: "12px",
+                                position: "relative",
+                                top: -15,
+                                left: -14,
+                              }}
+                            >
+                              {arrival.state === ""
+                                ? "Selecciona el estado antes"
+                                : "Selecciona la ciudad"}
+                            </FormHelperText>
+                          )}
                         </FormControl>
                       </div>
                       <TextField
                         id="outlined-basic"
                         label="Direccion"
                         variant="outlined"
+                        helperText={
+                          arrival.address === "" && error
+                            ? "Este campo no puede estar vacío"
+                            : ""
+                        }
+                        error={arrival.address === "" && error ? true : false}
+                        FormHelperTextProps={{
+                          style: {
+                            color: "red",
+                            fontSize: "12px",
+                            position: "relative",
+                            top: -15,
+                            left: -14,
+                          },
+                        }}
                         onChange={(e) =>
                           setArrival({ ...arrival, address: e.target.value })
                         }
@@ -433,6 +523,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setArrival({ ...arrival, date: fecha });
                               }}
                               minDate={min}
+                              defaultValue={fechaToday}
                             />
                           </div>
                           <div className={styles.time}>
@@ -515,8 +606,24 @@ export default function ModalTravel({ open, close, offices }) {
                       variant="outlined"
                       onChange={(e) => setDriver(e.target.value)}
                       sx={{ width: 850 }}
+                      helperText={
+                        driver === "" && error ? "Coloca un conductor" : ""
+                      }
+                      FormHelperTextProps={{
+                        style: {
+                          color: "red",
+                          fontSize: "12px",
+                          position: "relative",
+                          top: -15,
+                          left: -14,
+                        },
+                      }}
+                      error={driver === "" && error ? true : false}
                     />
-                    <FormControl sx={{ width: 1250 }}>
+                    <FormControl
+                      sx={{ width: 1250 }}
+                      error={transport === "" && error ? true : false}
+                    >
                       <InputLabel id="demo-simple-select-label">
                         Tipo de transporte
                       </InputLabel>
@@ -532,6 +639,19 @@ export default function ModalTravel({ open, close, offices }) {
                           </MenuItem>
                         ))}
                       </Select>
+                      {transport === "" && error && (
+                        <FormHelperText
+                          style={{
+                            color: "red",
+                            fontSize: "12px",
+                            position: "relative",
+                            top: -15,
+                            left: -14,
+                          }}
+                        >
+                          Selecciona un tipo de transporte
+                        </FormHelperText>
+                      )}
                     </FormControl>
                     <div>
                       <div
@@ -544,16 +664,46 @@ export default function ModalTravel({ open, close, offices }) {
                           id="outlined-basic"
                           label="Precio"
                           variant="outlined"
+                          type="number"
                           onChange={(e) => setPrice(e.target.value)}
                           sx={{ width: 150 }}
+                          helperText={
+                            price === "" && error ? "Coloca un precio" : ""
+                          }
+                          FormHelperTextProps={{
+                            style: {
+                              color: "red",
+                              fontSize: "12px",
+                              position: "relative",
+                              top: -15,
+                              left: -14,
+                            },
+                          }}
+                          error={price === "" && error ? true : false}
                         />
 
                         <TextField
                           id="outlined-basic"
                           variant="outlined"
                           label="Cantidad de puestos"
+                          type="number"
                           onChange={(e) => setQuantity(e.target.value)}
                           sx={{ width: 250 }}
+                          helperText={
+                            quantity === "" && error
+                              ? "Coloca una cantidad de puestos"
+                              : ""
+                          }
+                          FormHelperTextProps={{
+                            style: {
+                              color: "red",
+                              fontSize: "12px",
+                              position: "relative",
+                              top: -15,
+                              left: -14,
+                            },
+                          }}
+                          error={quantity === "" && error ? true : false}
                         />
                       </div>
 
@@ -915,6 +1065,18 @@ export default function ModalTravel({ open, close, offices }) {
                     variant="contained"
                     size="large"
                     onClick={() => {
+                      if (
+                        arrival.address === "" ||
+                        quantity === "" ||
+                        driver === "" ||
+                        transport === "" ||
+                        price === "" ||
+                        arrival.city === "" ||
+                        arrival.state === ""
+                      ) {
+                        setError(true);
+                        return;
+                      }
                       onCreateTravel();
                       // resetModal();
                     }}
