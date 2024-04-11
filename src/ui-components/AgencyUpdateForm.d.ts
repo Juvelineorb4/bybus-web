@@ -15,6 +15,8 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type AgencyUpdateFormInputValues = {
     cognitoID?: string;
+    identityID?: string;
+    image?: string;
     pin?: string;
     name?: string;
     rif?: string;
@@ -26,6 +28,8 @@ export declare type AgencyUpdateFormInputValues = {
 };
 export declare type AgencyUpdateFormValidationValues = {
     cognitoID?: ValidationFunction<string>;
+    identityID?: ValidationFunction<string>;
+    image?: ValidationFunction<string>;
     pin?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     rif?: ValidationFunction<string>;
@@ -39,6 +43,8 @@ export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes
 export declare type AgencyUpdateFormOverridesProps = {
     AgencyUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     cognitoID?: PrimitiveOverrideProps<TextFieldProps>;
+    identityID?: PrimitiveOverrideProps<TextFieldProps>;
+    image?: PrimitiveOverrideProps<TextFieldProps>;
     pin?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     rif?: PrimitiveOverrideProps<TextFieldProps>;

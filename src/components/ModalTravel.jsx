@@ -185,22 +185,22 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
-    // try {
-    //   const { data } = await API.graphql({
-    //     query: mutations.reprogram,
-    //     authMode: "AMAZON_COGNITO_USER_POOLS",
-    //     variables: { input: JSON.stringify(params) },
-    //   });
-    //   const result = JSON.parse(data?.reprogram);
+    try {
+      const { data } = await API.graphql({
+        query: mutations.reprogram,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: { input: JSON.stringify(params) },
+      });
+      const result = JSON.parse(data?.reprogram);
 
-    //   if (result?.status !== 200) {
-    //     throw new Error(`toy aqui manito ${result?.error}`);
-    //   }
-    //   resetModal();
-    // } catch (error) {
-    //   console.log("EL ERROR:  ", error.Error);
-    //   alert(error);
-    // }
+      if (result?.status !== 200) {
+        throw new Error(`toy aqui manito ${result?.error}`);
+      }
+      resetModal();
+    } catch (error) {
+      console.log("EL ERROR:  ", error.Error);
+      alert(error);
+    }
   };
 
   useEffect(() => {
