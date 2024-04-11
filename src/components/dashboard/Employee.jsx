@@ -58,12 +58,10 @@ const Dashboard = ({ dataResult, userType }) => {
       variables: {
         filter: {
           agencyID: { eq: list?.data?.getEmployee?.agencyID },
-          createdBy: { eq: router.id },
+          // createdBy: { eq: router.id },
         },
       },
     });
-    console.log(travels);
-    console.log(list?.data?.getEmployee?.agencyID);
     // let array = travels?.data.listBookings.items.sort(
     //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     // );
@@ -80,10 +78,11 @@ const Dashboard = ({ dataResult, userType }) => {
       (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     );
     let resultado = [...aprobados, ...cancelados];
-    let arrayFilter = resultado.filter(
-      (objeto) => objeto.createdBy === dataResult.id
-    );
-    setDataTravels(arrayFilter);
+    // let arrayFilter = resultado.filter(
+    //   (objeto) => objeto.createdBy === dataResult.id
+    // );
+    console.log('toy q', resultado)
+    setDataTravels(resultado);
   };
 
   const Travels = async () => {

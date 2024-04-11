@@ -1,14 +1,14 @@
 .profiles {
   display: flex;
-  gap: 3rem;
+  flex-wrap: wrap;
+  gap: 4rem;
   margin-bottom: 13rem;
 }
 .profile {
   border: 1px solid var(--black);
   padding: 1rem;
-
-  max-width: 250px;
-  max-height: 250px;
+  width: 200px;
+  height: 250px;
   border-radius: 8px;
   background-color: var(--white);
   display: flex;
