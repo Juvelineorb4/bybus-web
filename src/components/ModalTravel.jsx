@@ -18,7 +18,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { time, transportes, venezuela, week } from "@/constants";
+import { features, time, transportes, venezuela, week } from "@/constants";
 import { Auth, API } from "aws-amplify";
 import * as queries from "@/graphql/queries";
 import * as mutations from "@/graphql/mutations";
@@ -41,6 +41,8 @@ export default function ModalTravel({ open, close, offices }) {
   const [endDate, setEndDate] = useState(null);
   const [min, setMin] = useState(null);
   const [quantity, setQuantity] = useState("");
+  const [parking, setParking] = useState("");
+  const [selectCharts, setSelectCharts] = useState([]);
   const [percentage, setPercentage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -117,6 +119,8 @@ export default function ModalTravel({ open, close, offices }) {
     setQuantity("");
     setSelectWeek([]);
     setChecked(true);
+    setParking("")
+    setSelectCharts([])
     setBtnDisabled(false);
     close();
   };
@@ -125,6 +129,12 @@ export default function ModalTravel({ open, close, offices }) {
       target: { value },
     } = event;
     setSelectWeek(typeof value === "string" ? value.split(",") : value);
+  };
+  const handleChangeCharts = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectCharts(typeof value === "string" ? value.split(",") : value);
   };
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -157,6 +167,8 @@ export default function ModalTravel({ open, close, offices }) {
         officeID: offices.id,
         transport: transport,
         driver: driver,
+        transportParking: parking,
+        transportFeatures: selectCharts,
         departure: {
           time: timeD,
           date: departure.date,
@@ -231,8 +243,10 @@ export default function ModalTravel({ open, close, offices }) {
       minutosRedondeados = `00`;
     }
     let horaFormateada =
-      horas < 10 ? `0${minutosRedondeados >= `00` ? horas + 1 : horas}` : `${horas}`;
-    
+      horas < 10
+        ? `0${minutosRedondeados >= `00` ? horas + 1 : horas}`
+        : `${horas}`;
+
     setTimeDeparture({
       hour: horaFormateada,
       minutes: minutosRedondeados,
@@ -718,6 +732,67 @@ export default function ModalTravel({ open, close, offices }) {
                       </div>
                     </div>
                   </div>
+                  <p>Opcionales</p>
+                  <div
+                    style={{
+                      display: "flex",
+                    }}
+                  >
+                    <TextField
+                      id="outlined-basic"
+                      label="Lugar del estacionamiento"
+                      variant="outlined"
+                      // helperText={
+                      //   arrival.address === "" && error
+                      //     ? "Este campo no puede estar vacío"
+                      //     : ""
+                      // }
+                      // error={arrival.address === "" && error ? true : false}
+                      // FormHelperTextProps={{
+                      //   style: {
+                      //     color: "red",
+                      //     fontSize: "12px",
+                      //     position: "relative",
+                      //     top: -15,
+                      //     left: -14,
+                      //   },
+                      // }}
+                      onChange={(e) =>
+                        setParking(e.target.value)
+                      }
+                      sx={{
+                        width: 500
+                      }}
+                    />
+
+                    <FormControl fullWidth style={{ marginLeft: "5px" }}>
+                      <InputLabel id="demo-multiple-checkbox-label">
+                        Caracteristicas del bus
+                      </InputLabel>
+                      <Select
+                        labelId="demo-multiple-checkbox-label"
+                        id="demo-multiple-checkbox"
+                        multiple
+                        value={selectCharts}
+                        onChange={handleChangeCharts}
+                        input={
+                          <OutlinedInput label="Caracteristicas del bus" />
+                        }
+                        renderValue={(selected) =>
+                          selected.map((charts) => features[charts]).join(", ")
+                        }
+                        MenuProps={MenuProps}
+                      >
+                        {Object.keys(features).map((charts) => (
+                          <MenuItem key={charts} value={charts}>
+                            <Checkbox checked={selectCharts.indexOf(charts) > -1} />
+                            <ListItemText primary={features[charts]} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
                   {/* <p>Paradas</p> */}
                   {/* <div className={styles.stop}>
                     <div className={styles.stopBooking}>
