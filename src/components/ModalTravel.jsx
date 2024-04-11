@@ -165,8 +165,8 @@ export default function ModalTravel({ open, close, offices }) {
         },
         departureCity: departure.city,
         arrivalCity: arrival.city,
-        stock: quantity.trim(),
-        price: price.trim(),
+        stock: parseInt(quantity.trim()),
+        price: parseFloat(price.trim()),
         createdBy: profileAuth.id,
       },
       owner: userAuth?.username,
@@ -177,13 +177,25 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
 
-    const ejele = await API.graphql({
-      query: mutations.reprogram,
-      authMode: "AMAZON_COGNITO_USER_POOLS",
-      variables: { input: JSON.stringify(params) },
-    });
+    try {
+      const { data } = await API.graphql({
+        query: mutations.reprogram,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: { input: JSON.stringify(params) },
+      });
+      const result = JSON.parse(data?.reprogram);
+
+      if (result?.status !== 200) {
+        throw new Error(`${result?.error}`);
+      }
+      resetModal();
+    } catch (error) {
+      console.log("EL ERROR:  ", error.Error);
+      alert(error);
+    }
+    return;
+
     console.log("QUE RESPUESTA ESPERO:", ejele);
-    resetModal();
   };
 
   useEffect(() => {
