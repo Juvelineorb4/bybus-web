@@ -49,6 +49,7 @@ export default function ModalOffice({ open, close }) {
     }
     setIsLoading(false);
     resetModal();
+    location.reload()
   };
 
   const resetModal = () => {

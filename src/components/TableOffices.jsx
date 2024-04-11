@@ -73,7 +73,7 @@ const TableOffices = ({ rows }) => {
                 setData(params.row);
                 setOpen(!open);
               }}
-            >{`Ver`}</button>
+            >{`Editar`}</button>
             <button
               onClick={() => {
                 let opcion = confirm(

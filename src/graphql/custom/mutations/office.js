@@ -13,6 +13,24 @@ export const createOffice = /* GraphQL */ `
   }
 `;
 
+export const updateOffice = /* GraphQL */ `
+  mutation UpdateOffice(
+    $input: UpdateOfficeInput!
+    $condition: ModelOfficeConditionInput
+  ) {
+    updateOffice(input: $input, condition: $condition) {
+      id
+      agencyID
+      name
+      state
+      city
+      address
+      email
+      phone
+    }
+  }
+`;
+
 export const updateBooking = /* GraphQL */ `
   mutation UpdateBooking(
     $input: UpdateBookingInput!
