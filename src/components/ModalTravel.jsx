@@ -41,6 +41,7 @@ export default function ModalTravel({ open, close, offices }) {
   const [min, setMin] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [percentage, setPercentage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const officePercentage = async () => {
     const result = await API.graphql({
@@ -193,9 +194,6 @@ export default function ModalTravel({ open, close, offices }) {
       console.log("EL ERROR:  ", error.Error);
       alert(error);
     }
-    return;
-
-    console.log("QUE RESPUESTA ESPERO:", ejele);
   };
 
   useEffect(() => {
