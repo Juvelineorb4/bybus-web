@@ -35,7 +35,9 @@ export default function ModalAgencies({ open, close, data, type }) {
     close();
   };
   useEffect(() => {
+    console.log(data)
     if (open) {
+      setImage(data.image)
       setName(data.name);
       setEmail(data.email);
       setRif(data.rif);

@@ -31,6 +31,7 @@ export const listAgencies = /* GraphQL */ `
         email
         phone
         percentage
+        image
         status
         history {
           items {
