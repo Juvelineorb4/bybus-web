@@ -7,6 +7,7 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import Modal from "@mui/material/Modal";
 import { TextField, Button, CircularProgress } from "@mui/material";
+import Image from "next/image";
 import Link from "next/link";
 import { Auth, API } from "aws-amplify";
 import { getAgency } from "@/graphql/custom/queries/profile";
@@ -60,6 +61,7 @@ const Profiles = ({ error }) => {
         },
       });
       setAgency(employees.data.getAgency);
+      console.log(employees.data.getAgency);
       const newEmployees = employees.data.getAgency.employees.items.filter(
         (item) => item.type === "OFFICE"
       );
@@ -209,6 +211,7 @@ const Profiles = ({ error }) => {
               <AccountManager
                 onHandleProfileClick={onHandleProfileClick}
                 agencyID={userAuth?.attributes["custom:agencyID"]}
+                image={agency?.image}
               />
             )}
             {/* <div> */}
@@ -347,7 +350,7 @@ const AccountEmployee = ({
     </div>
   );
 };
-const AccountManager = ({ onHandleProfileClick, agencyID = null }) => {
+const AccountManager = ({ onHandleProfileClick, agencyID = null, image }) => {
   const params = {
     id: agencyID,
     rol: "owner",
@@ -358,9 +361,15 @@ const AccountManager = ({ onHandleProfileClick, agencyID = null }) => {
       className={styles.profile}
       onClick={() => onHandleProfileClick(params)}
     >
-      <ManageAccountsRoundedIcon
-        sx={{ color: "rgba(0, 0, 0, 0.85)", height: 100, width: 100 }}
-      />
+      {image ? (
+        <Image src={image} alt="" width={100} height={100} style={{
+          borderRadius: 50
+        }} />
+      ) : (
+        <ManageAccountsRoundedIcon
+          sx={{ color: "rgba(0, 0, 0, 0.85)", height: 100, width: 100 }}
+        />
+      )}
       <div className={styles.profileName}>
         <p>Administrador- </p>
         <SupervisorAccountIcon

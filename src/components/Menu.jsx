@@ -13,13 +13,14 @@ import { menu } from "@/constants";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMenu } from "@/context/MenuContext";
-import { Auth } from "aws-amplify";
+import { Auth, API } from "aws-amplify";
 import { useUser } from "@/context/UserContext";
 import KeyboardBackspaceRoundedIcon from "@mui/icons-material/KeyboardBackspaceRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import SubjectRoundedIcon from "@mui/icons-material/SubjectRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import PaidRoundedIcon from "@mui/icons-material/PaidRounded";
+import { getAgency } from "@/graphql/custom/queries/profile";
 
 const Menu = ({ ancho, dataResult }) => {
   const { userAuth, profileAuth, setTokenProfile, setTokenUser, setClearAll } =
@@ -28,7 +29,23 @@ const Menu = ({ ancho, dataResult }) => {
   const router = useRouter();
   const [openAgencies, setOpenAgencies] = useState(true);
   const [openUsers, setOpenUsers] = useState(true);
-  console.log(dataResult);
+  const [imageAgency, setImageAgency] = useState(true);
+  console.log("aqiui", dataResult);
+  const fecthImage = async () => {
+    try {
+      const imageUpload = await API.graphql({
+        query: getAgency,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          id: userAuth?.attributes["custom:agencyID"],
+        },
+      });
+      setImageAgency(imageUpload.data.getAgency);
+      console.log("imagen", imageUpload.data.getAgency);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleAgencies = () => {
     setOpenAgencies(!openAgencies);
   };
@@ -39,6 +56,9 @@ const Menu = ({ ancho, dataResult }) => {
     setClearAll();
     Auth.signOut();
   };
+  useEffect(() => {
+    fecthImage();
+  }, []);
 
   return (
     userAuth && (
@@ -50,9 +70,7 @@ const Menu = ({ ancho, dataResult }) => {
       >
         <div className={styles.logo}>
           <Image src={menu.image} alt="" />
-          <div className={styles.panelLogo}>
-            {/* <Image alt="" width={50} height={50} /> */}
-          </div>
+          {/*  */}
         </div>
 
         <List
@@ -165,15 +183,50 @@ const Menu = ({ ancho, dataResult }) => {
           </ListItemButton>
         </List>
 
-        <div className={styles.panel}>
-          <div className={styles.panelName}>
-            <p className={styles.panelName1}>Oficina:</p>
-            <p className={styles.panelName2}>{dataResult?.office?.name}</p>
-          </div>
-          <div className={styles.panelName}>
-            <p className={styles.panelName1}>Empleado:</p>
-            <p className={styles.panelName2}>{dataResult?.name}</p>
-          </div>
+        <div>
+          {profileAuth?.rol === "owner" ? (
+            <div className={styles.panel}>
+              {imageAgency?.image && (
+                <Image
+                  src={imageAgency?.image}
+                  alt=""
+                  width={80}
+                  height={80}
+                  style={{
+                    borderRadius: 50,
+                    marginBottom: 5
+                  }}
+                />
+              )}
+              <div className={styles.panelName}>
+                <p className={styles.panelName1}>Agencia:</p>
+                <p className={styles.panelName2}>{dataResult?.name}</p>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.panel}>
+              {imageAgency?.image && (
+                <Image
+                  src={imageAgency?.image}
+                  alt=""
+                  width={80}
+                  height={80}
+                  style={{
+                    borderRadius: 50,
+                    marginBottom: 5
+                  }}
+                />
+              )}
+              <div className={styles.panelName}>
+                <p className={styles.panelName1}>Oficina:</p>
+                <p className={styles.panelName2}>{dataResult?.office?.name}</p>
+              </div>
+              <div className={styles.panelName}>
+                <p className={styles.panelName1}>Empleado:</p>
+                <p className={styles.panelName2}>{dataResult?.name}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

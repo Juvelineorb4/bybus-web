@@ -7,6 +7,7 @@ export const getAgency = /* GraphQL */ `
       name
       rif
       email
+      image
       phone
       employees {
         items {
