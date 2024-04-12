@@ -7,10 +7,11 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { getOverrideProps } from "@aws-amplify/ui-react/internal";
-import { AgencyHistory } from "../models";
-import { fetchByPath, validateField } from "./utils";
-import { DataStore } from "aws-amplify";
+import { fetchByPath, getOverrideProps, validateField } from "./utils";
+import { generateClient } from "aws-amplify/api";
+import { getAgencyHistory } from "../graphql/queries";
+import { updateAgencyHistory } from "../graphql/mutations";
+const client = generateClient();
 export default function AgencyHistoryUpdateForm(props) {
   const {
     id: idProp,
@@ -46,7 +47,12 @@ export default function AgencyHistoryUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(AgencyHistory, idProp)
+        ? (
+            await client.graphql({
+              query: getAgencyHistory.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getAgencyHistory
         : agencyHistoryModelProp;
       setAgencyHistoryRecord(record);
     };
@@ -83,8 +89,8 @@ export default function AgencyHistoryUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          reason,
-          description,
+          reason: reason ?? null,
+          description: description ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -110,21 +116,26 @@ export default function AgencyHistoryUpdateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value.trim() === "") {
-              modelFields[key] = undefined;
+            if (typeof value === "string" && value === "") {
+              modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            AgencyHistory.copyOf(agencyHistoryRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateAgencyHistory.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: agencyHistoryRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
