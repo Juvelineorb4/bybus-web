@@ -21,14 +21,14 @@ import SubjectRoundedIcon from "@mui/icons-material/SubjectRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import PaidRoundedIcon from "@mui/icons-material/PaidRounded";
 
-const Menu = ({ancho}) => {
+const Menu = ({ ancho, dataResult }) => {
   const { userAuth, profileAuth, setTokenProfile, setTokenUser, setClearAll } =
     useUser();
   const { updateIndex, selectedIndex } = useMenu();
   const router = useRouter();
   const [openAgencies, setOpenAgencies] = useState(true);
   const [openUsers, setOpenUsers] = useState(true);
-
+  console.log(dataResult);
   const handleAgencies = () => {
     setOpenAgencies(!openAgencies);
   };
@@ -42,11 +42,17 @@ const Menu = ({ancho}) => {
 
   return (
     userAuth && (
-      <div className={styles.menu} style={{
-        width: ancho
-      }}>
+      <div
+        className={styles.menu}
+        style={{
+          width: ancho,
+        }}
+      >
         <div className={styles.logo}>
           <Image src={menu.image} alt="" />
+          <div className={styles.panelLogo}>
+            {/* <Image alt="" width={50} height={50} /> */}
+          </div>
         </div>
 
         <List
@@ -69,10 +75,14 @@ const Menu = ({ancho}) => {
             selected={selectedIndex === 0}
             onClick={(e) => {
               e.preventDefault;
-              if(profileAuth?.rol === 'owner') {
-                router.push(`/home/dashboard?type=${profileAuth?.rol}&id=${profileAuth?.id}`)
+              if (profileAuth?.rol === "owner") {
+                router.push(
+                  `/home/dashboard?type=${profileAuth?.rol}&id=${profileAuth?.id}`
+                );
               } else {
-                router.push(`/home/dashboard?type=${profileAuth?.rol}&id=${profileAuth?.id}&offficeID=${profileAuth?.officeID}`)
+                router.push(
+                  `/home/dashboard?type=${profileAuth?.rol}&id=${profileAuth?.id}&offficeID=${profileAuth?.officeID}`
+                );
               }
               updateIndex(0);
             }}
@@ -92,10 +102,14 @@ const Menu = ({ancho}) => {
             selected={selectedIndex === 1}
             onClick={(e) => {
               e.preventDefault();
-              if(profileAuth?.rol === 'owner') {
-                router.push(`/home/management?type=${profileAuth?.rol}&id=${profileAuth?.id}`)
+              if (profileAuth?.rol === "owner") {
+                router.push(
+                  `/home/management?type=${profileAuth?.rol}&id=${profileAuth?.id}`
+                );
               } else {
-                router.push(`/home/management?type=${profileAuth?.rol}&id=${profileAuth?.id}&offficeID=${profileAuth?.officeID}`)
+                router.push(
+                  `/home/management?type=${profileAuth?.rol}&id=${profileAuth?.id}&offficeID=${profileAuth?.officeID}`
+                );
               }
               updateIndex(1);
               console.log(selectedIndex);
@@ -151,7 +165,16 @@ const Menu = ({ancho}) => {
           </ListItemButton>
         </List>
 
-        <div className={styles.panel}></div>
+        <div className={styles.panel}>
+          <div className={styles.panelName}>
+            <p className={styles.panelName1}>Oficina:</p>
+            <p className={styles.panelName2}>{dataResult?.office?.name}</p>
+          </div>
+          <div className={styles.panelName}>
+            <p className={styles.panelName1}>Empleado:</p>
+            <p className={styles.panelName2}>{dataResult?.name}</p>
+          </div>
+        </div>
       </div>
     )
   );
