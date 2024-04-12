@@ -32,6 +32,8 @@ export default function AgencyUpdateForm(props) {
   } = props;
   const initialValues = {
     cognitoID: "",
+    identityID: "",
+    image: "",
     pin: "",
     name: "",
     rif: "",
@@ -42,6 +44,8 @@ export default function AgencyUpdateForm(props) {
     owner: "",
   };
   const [cognitoID, setCognitoID] = React.useState(initialValues.cognitoID);
+  const [identityID, setIdentityID] = React.useState(initialValues.identityID);
+  const [image, setImage] = React.useState(initialValues.image);
   const [pin, setPin] = React.useState(initialValues.pin);
   const [name, setName] = React.useState(initialValues.name);
   const [rif, setRif] = React.useState(initialValues.rif);
@@ -56,6 +60,8 @@ export default function AgencyUpdateForm(props) {
       ? { ...initialValues, ...agencyRecord }
       : initialValues;
     setCognitoID(cleanValues.cognitoID);
+    setIdentityID(cleanValues.identityID);
+    setImage(cleanValues.image);
     setPin(cleanValues.pin);
     setName(cleanValues.name);
     setRif(cleanValues.rif);
@@ -84,6 +90,8 @@ export default function AgencyUpdateForm(props) {
   React.useEffect(resetStateValues, [agencyRecord]);
   const validations = {
     cognitoID: [],
+    identityID: [],
+    image: [],
     pin: [],
     name: [],
     rif: [],
@@ -120,6 +128,8 @@ export default function AgencyUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           cognitoID: cognitoID ?? null,
+          identityID: identityID ?? null,
+          image: image ?? null,
           pin: pin ?? null,
           name: name ?? null,
           rif: rif ?? null,
@@ -189,6 +199,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID: value,
+              identityID,
+              image,
               pin,
               name,
               rif,
@@ -212,6 +224,74 @@ export default function AgencyUpdateForm(props) {
         {...getOverrideProps(overrides, "cognitoID")}
       ></TextField>
       <TextField
+        label="Identity id"
+        isRequired={false}
+        isReadOnly={false}
+        value={identityID}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoID,
+              identityID: value,
+              image,
+              pin,
+              name,
+              rif,
+              email,
+              phone,
+              percentage,
+              status,
+              owner,
+            };
+            const result = onChange(modelFields);
+            value = result?.identityID ?? value;
+          }
+          if (errors.identityID?.hasError) {
+            runValidationTasks("identityID", value);
+          }
+          setIdentityID(value);
+        }}
+        onBlur={() => runValidationTasks("identityID", identityID)}
+        errorMessage={errors.identityID?.errorMessage}
+        hasError={errors.identityID?.hasError}
+        {...getOverrideProps(overrides, "identityID")}
+      ></TextField>
+      <TextField
+        label="Image"
+        isRequired={false}
+        isReadOnly={false}
+        value={image}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              cognitoID,
+              identityID,
+              image: value,
+              pin,
+              name,
+              rif,
+              email,
+              phone,
+              percentage,
+              status,
+              owner,
+            };
+            const result = onChange(modelFields);
+            value = result?.image ?? value;
+          }
+          if (errors.image?.hasError) {
+            runValidationTasks("image", value);
+          }
+          setImage(value);
+        }}
+        onBlur={() => runValidationTasks("image", image)}
+        errorMessage={errors.image?.errorMessage}
+        hasError={errors.image?.hasError}
+        {...getOverrideProps(overrides, "image")}
+      ></TextField>
+      <TextField
         label="Pin"
         isRequired={false}
         isReadOnly={false}
@@ -221,6 +301,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin: value,
               name,
               rif,
@@ -253,6 +335,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name: value,
               rif,
@@ -285,6 +369,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif: value,
@@ -317,6 +403,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif,
@@ -349,6 +437,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif,
@@ -385,6 +475,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif,
@@ -417,6 +509,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif,
@@ -460,6 +554,8 @@ export default function AgencyUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               cognitoID,
+              identityID,
+              image,
               pin,
               name,
               rif,
