@@ -46,6 +46,7 @@ export default function ModalTravel({ open, close, offices }) {
   const [selectCharts, setSelectCharts] = useState([]);
   const [percentage, setPercentage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorTime, setErrorTime] = useState(false);
   let fechaToday = new Date();
@@ -219,8 +220,8 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
+    setLoading(true);
     try {
-      return;
       const { data } = await API.graphql({
         query: mutations.reprogram,
         authMode: "AMAZON_COGNITO_USER_POOLS",
@@ -238,6 +239,7 @@ export default function ModalTravel({ open, close, offices }) {
       console.log("EL ERROR:  ", error.Error);
       alert(error);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -858,6 +860,7 @@ export default function ModalTravel({ open, close, offices }) {
                   <Button
                     variant="contained"
                     size="large"
+                    disabled={loading}
                     onClick={() => {
                       if (
                         arrival.address === "" ||
@@ -882,6 +885,7 @@ export default function ModalTravel({ open, close, offices }) {
                     size="large"
                     color="error"
                     onClick={resetModal}
+                    disabled={loading}
                   >
                     Cancelar
                   </Button>
