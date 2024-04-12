@@ -210,6 +210,7 @@ export default function ModalTravel({ open, close, offices }) {
         throw new Error(`toy aqui manito ${result?.error}`);
       }
       resetModal();
+      alert("Tu viaje fue creado correctamente");
       setIsLoading(!isLoading);
       // location.reload();
     } catch (error) {
