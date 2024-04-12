@@ -78,11 +78,11 @@ const Dashboard = ({ dataResult, userType }) => {
       (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     );
     let resultado = [...aprobados, ...cancelados];
-    // let arrayFilter = resultado.filter(
-    //   (objeto) => objeto.createdBy === dataResult.id
-    // );
-    console.log('toy q', resultado)
-    setDataTravels(resultado);
+    let arrayFilter = resultado.filter(
+      (objeto) => objeto.officeID === dataResult.officeID
+    );
+    console.log('toy q', arrayFilter)
+    setDataTravels(arrayFilter);
   };
 
   const Travels = async () => {

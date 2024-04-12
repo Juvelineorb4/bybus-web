@@ -47,7 +47,8 @@ export default function ModalTravel({ open, close, offices }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   let fechaToday = new Date();
-
+  let fechaInitialArrival = new Date();
+  fechaInitialArrival.setDate(fechaInitialArrival.getDate() + 1);
   const dateToday = () => {
     let fechaTodayHere = new Date();
   };
@@ -119,8 +120,8 @@ export default function ModalTravel({ open, close, offices }) {
     setQuantity("");
     setSelectWeek([]);
     setChecked(true);
-    setParking("")
-    setSelectCharts([])
+    setParking("");
+    setSelectCharts([]);
     setBtnDisabled(false);
     close();
   };
@@ -205,10 +206,12 @@ export default function ModalTravel({ open, close, offices }) {
       });
       const result = JSON.parse(data?.reprogram);
 
-      if (result?.status !== 200) {
+      if (result?.statusCode !== 200) {
         throw new Error(`toy aqui manito ${result?.error}`);
       }
       resetModal();
+      setIsLoading(!isLoading);
+      // location.reload();
     } catch (error) {
       console.log("EL ERROR:  ", error.Error);
       alert(error);
@@ -219,6 +222,9 @@ export default function ModalTravel({ open, close, offices }) {
     // dateToday();
     let fechaInitial = new Date().toISOString().slice(0, 10);
     let fechaToday = new Date();
+    let fechaInitialArrival = new Date();
+    fechaInitialArrival.setDate(fechaInitialArrival.getDate() + 1);
+    let fechaMasUnDia = fechaInitialArrival.toISOString().slice(0, 10);
     officePercentage();
     setDeparture({
       ...departure,
@@ -230,7 +236,7 @@ export default function ModalTravel({ open, close, offices }) {
     setStartDate(fechaToday);
     setEndDate(addDays(fechaToday, 7));
     setMin(fechaToday);
-    setArrival({ ...arrival, date: fechaInitial });
+    setArrival({ ...arrival, date: fechaMasUnDia });
     let horas = fechaToday.getHours();
     let minutos = fechaToday.getMinutes();
     let ampm = horas >= 12 ? "PM" : "AM";
@@ -244,7 +250,11 @@ export default function ModalTravel({ open, close, offices }) {
     }
     let horaFormateada =
       horas < 10
-        ? `0${minutosRedondeados >= `00` ? horas + 1 : horas}`
+        ? `${
+            minutosRedondeados >= `00` && horas >= 9
+              ? `${horas + 1}`
+              : `0${horas + 1}`
+          }`
         : `${horas}`;
 
     setTimeDeparture({
@@ -252,10 +262,8 @@ export default function ModalTravel({ open, close, offices }) {
       minutes: minutosRedondeados,
       mode: ampm,
     });
-    console.log(horaFormateada);
-    console.log(minutosRedondeados);
-    console.log(ampm);
-  }, []);
+    console.log("aqui", fechaMasUnDia);
+  }, [isLoading]);
 
   if (offices)
     return (
@@ -537,7 +545,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setArrival({ ...arrival, date: fecha });
                               }}
                               minDate={min}
-                              defaultValue={fechaToday}
+                              defaultValue={fechaInitialArrival}
                             />
                           </div>
                           <div className={styles.time}>
@@ -757,11 +765,9 @@ export default function ModalTravel({ open, close, offices }) {
                       //     left: -14,
                       //   },
                       // }}
-                      onChange={(e) =>
-                        setParking(e.target.value)
-                      }
+                      onChange={(e) => setParking(e.target.value)}
                       sx={{
-                        width: 500
+                        width: 500,
                       }}
                     />
 
@@ -785,7 +791,9 @@ export default function ModalTravel({ open, close, offices }) {
                       >
                         {Object.keys(features).map((charts) => (
                           <MenuItem key={charts} value={charts}>
-                            <Checkbox checked={selectCharts.indexOf(charts) > -1} />
+                            <Checkbox
+                              checked={selectCharts.indexOf(charts) > -1}
+                            />
                             <ListItemText primary={features[charts]} />
                           </MenuItem>
                         ))}
