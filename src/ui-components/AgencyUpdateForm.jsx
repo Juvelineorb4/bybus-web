@@ -13,11 +13,10 @@ import {
   SelectField,
   TextField,
 } from "@aws-amplify/ui-react";
-import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { generateClient } from "aws-amplify/api";
-import { getAgency } from "../graphql/queries";
-import { updateAgency } from "../graphql/mutations";
-const client = generateClient();
+import { getOverrideProps } from "@aws-amplify/ui-react/internal";
+import { Agency } from "../models";
+import { fetchByPath, validateField } from "./utils";
+import { DataStore } from "aws-amplify";
 export default function AgencyUpdateForm(props) {
   const {
     id: idProp,
@@ -76,12 +75,7 @@ export default function AgencyUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? (
-            await client.graphql({
-              query: getAgency.replaceAll("__typename", ""),
-              variables: { id: idProp },
-            })
-          )?.data?.getAgency
+        ? await DataStore.query(Agency, idProp)
         : agencyModelProp;
       setAgencyRecord(record);
     };
@@ -127,6 +121,7 @@ export default function AgencyUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+<<<<<<< HEAD
           cognitoID: cognitoID ?? null,
           identityID: identityID ?? null,
           image: image ?? null,
@@ -138,6 +133,19 @@ export default function AgencyUpdateForm(props) {
           percentage: percentage ?? null,
           status: status ?? null,
           owner: owner ?? null,
+=======
+          cognitoID,
+          identityID,
+          image,
+          pin,
+          name,
+          rif,
+          email,
+          phone,
+          percentage,
+          status,
+          owner,
+>>>>>>> 050775fa461aad5ce2fbcd310502630f8abb735f
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -163,26 +171,21 @@ export default function AgencyUpdateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value === "") {
-              modelFields[key] = null;
+            if (typeof value === "string" && value.trim() === "") {
+              modelFields[key] = undefined;
             }
           });
-          await client.graphql({
-            query: updateAgency.replaceAll("__typename", ""),
-            variables: {
-              input: {
-                id: agencyRecord.id,
-                ...modelFields,
-              },
-            },
-          });
+          await DataStore.save(
+            Agency.copyOf(agencyRecord, (updated) => {
+              Object.assign(updated, modelFields);
+            })
+          );
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            const messages = err.errors.map((e) => e.message).join("\n");
-            onError(modelFields, messages);
+            onError(modelFields, err.message);
           }
         }
       }}

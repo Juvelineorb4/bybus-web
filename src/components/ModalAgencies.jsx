@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import { Button, TextField, CircularProgress } from "@mui/material";
 import styles from "@/styles/Modal.module.css";
-import { API } from "aws-amplify";
-import { registerAgencyAdmin } from "@/graphql/mutations";
+import { API, Auth } from "aws-amplify";
+import { registerAgencyAdmin, uploadAgencyImage } from "@/graphql/mutations";
 import { updateAgency } from "@/graphql/custom/mutations";
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+
 export default function ModalAgencies({ open, close, data, type }) {
   const [isLoading, setIsLoading] = useState(false);
   const [edit, setEdit] = useState(true);
@@ -13,6 +15,9 @@ export default function ModalAgencies({ open, close, data, type }) {
   const [rif, setRif] = useState("");
   const [tableID, setTableID] = useState("");
   const [phone, setPhone] = useState("");
+  const [imageName, setImageName] = useState("");
+  const [image, setImage] = useState("");
+  const [base64, setBase64] = useState("");
   const [percentage, setPercentage] = useState(
     data?.percentage ? data?.percentage : 10
   );
@@ -22,6 +27,7 @@ export default function ModalAgencies({ open, close, data, type }) {
     setName("");
     setEmail("");
     setRif("");
+    setBase64("")
     setPhone("");
     setTableID("");
     setPercentage(10);
@@ -51,6 +57,7 @@ export default function ModalAgencies({ open, close, data, type }) {
   };
 
   const onHandleRegister = async () => {
+    const { identityId } = await Auth.currentUserCredentials();
     const params = {
       username: email,
       name: name,
@@ -58,6 +65,8 @@ export default function ModalAgencies({ open, close, data, type }) {
       phone: phone,
       percentage: percentage,
       agencySubsTableID: tableID,
+      identityID: identityId,
+      base64Image: base64,
     };
     setIsLoading(true);
     try {
@@ -102,6 +111,7 @@ export default function ModalAgencies({ open, close, data, type }) {
   useEffect(() => {}, []);
 
   const onHandleEdit = async () => {
+    const { identityId } = await Auth.currentUserCredentials();
     console.log("listo ara editar");
     const params = {
       id: data?.id,
@@ -118,6 +128,16 @@ export default function ModalAgencies({ open, close, data, type }) {
         authMode: "AMAZON_COGNITO_USER_POOLS",
         variables: {
           input: params,
+        },
+      });
+      const image = API.graphql({
+        query: uploadAgencyImage,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          input: {
+            base64Image: base64,
+            identityID: identityId
+          },
         },
       });
     } catch (error) {
@@ -198,6 +218,41 @@ export default function ModalAgencies({ open, close, data, type }) {
                     }}
                     onChange={(e) => setPercentage(e.target.value)}
                   />
+                </div>
+                <div className={styles.inputImage}>
+                  {image ? (
+                    <div className={styles.imageSelect}>
+                      <img src={image} alt="preview" width={150} height={150} />
+                    </div>
+                  ) : (
+                    <div className={styles.imageNothing}>
+                      <AddPhotoAlternateIcon color="#2f2f2f" />
+                    </div>
+                  )}
+                  <Button variant="contained" component="label" disabled={edit}>
+                    Subir logo
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        let str = e.target.value;
+                        let parts = str.split("\\");
+                        let result = parts.slice(2).join("\\");
+                        setImageName(result);
+
+                        if (e.target.files && e.target.files[0]) {
+                          let img = URL.createObjectURL(e.target.files[0]);
+                          let reader = new FileReader();
+                          reader.onload = function (event) {
+                            let result = event.target.result;
+                            setBase64(result);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
+                          setImage(img);
+                        }
+                      }}
+                    />
+                  </Button>
                 </div>
               </div>
             </div>
