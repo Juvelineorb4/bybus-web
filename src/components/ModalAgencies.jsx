@@ -5,7 +5,7 @@ import styles from "@/styles/Modal.module.css";
 import { API, Auth } from "aws-amplify";
 import { registerAgencyAdmin, uploadAgencyImage } from "@/graphql/mutations";
 import { updateAgency } from "@/graphql/custom/mutations";
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 export default function ModalAgencies({ open, close, data, type }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function ModalAgencies({ open, close, data, type }) {
     setName("");
     setEmail("");
     setRif("");
-    setBase64("")
+    setBase64("");
     setPhone("");
     setTableID("");
     setPercentage(10);
@@ -35,9 +35,9 @@ export default function ModalAgencies({ open, close, data, type }) {
     close();
   };
   useEffect(() => {
-    console.log(data)
+    console.log(data);
     if (open) {
-      setImage(data.image)
+      setImage(data.image);
       setName(data.name);
       setEmail(data.email);
       setRif(data.rif);
@@ -132,18 +132,26 @@ export default function ModalAgencies({ open, close, data, type }) {
           input: params,
         },
       });
-      const image = API.graphql({
+      const { data: resultData } = await API.graphql({
         query: uploadAgencyImage,
         authMode: "AMAZON_COGNITO_USER_POOLS",
         variables: {
-          input: {
+          input: JSON.stringify({
+            agencyID: data?.id,
             base64Image: base64,
-            identityID: identityId
-          },
+            identityID: identityId,
+          }),
         },
       });
+      const result = JSON.parse(resultData?.uploadAgencyImage);
+      if (result?.statusCode !== 200) {
+        throw new Error(`${result?.error}`);
+      }
+      alert("Imagen Cargada con Exito");
+      location.reload();
     } catch (error) {
       console.error(" ERROR EN ACTUALIZAR AGENCIA: ", error);
+      alert(error);
       setIsLoading(false);
     }
     reset();

@@ -42,7 +42,7 @@ export default function ModalAgency({ open, close }) {
       identityID: identityId,
       base64Image: base64,
     };
-    console.log("tamos", params);
+  
     setIsLoading(true);
     try {
       // registrar agencia
