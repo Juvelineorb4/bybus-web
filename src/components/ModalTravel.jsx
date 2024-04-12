@@ -46,6 +46,7 @@ export default function ModalTravel({ open, close, offices }) {
   const [selectCharts, setSelectCharts] = useState([]);
   const [percentage, setPercentage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorTime, setErrorTime] = useState(false);
   let fechaToday = new Date();
@@ -177,11 +178,11 @@ export default function ModalTravel({ open, close, offices }) {
     let dateD = new Date(`${departure.date}T` + timeD + "Z");
     let dateA = new Date(`${arrival.date}T` + timeA + "Z");
     if (dateA < dateD) {
-      console.log('tamos aqui')
-      setErrorTime(true)
-      return
+      console.log("tamos aqui");
+      setErrorTime(true);
+      return;
     }
-    setErrorTime(false)
+    setErrorTime(false);
 
     const params = {
       booking: {
@@ -219,6 +220,7 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
+    setLoading(true);
     try {
       const { data } = await API.graphql({
         query: mutations.reprogram,
@@ -226,18 +228,18 @@ export default function ModalTravel({ open, close, offices }) {
         variables: { input: JSON.stringify(params) },
       });
       const result = JSON.parse(data?.reprogram);
-
+      console.log("QUE TRAJO: ", result);
       if (result?.statusCode !== 200) {
         throw new Error(`toy aqui manito ${result?.error}`);
       }
       resetModal();
       alert("Tu viaje fue creado correctamente");
       setIsLoading(!isLoading);
-      // location.reload();
     } catch (error) {
       console.log("EL ERROR:  ", error.Error);
       alert(error);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -360,9 +362,16 @@ export default function ModalTravel({ open, close, offices }) {
                             <DatePicker
                               onError={true}
                               onChange={(e) => {
-                                let fecha = new Date(e)
-                                  .toISOString()
-                                  .slice(0, 10);
+                                const year = e.getFullYear();
+                                const month = String(e.getMonth() + 1).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const day = String(e.getDate()).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const fecha = `${year}-${month}-${day}`;
                                 setDeparture({ ...departure, date: fecha });
                                 setStartDate(e);
                                 setEndDate(addDays(e, 7));
@@ -563,9 +572,16 @@ export default function ModalTravel({ open, close, offices }) {
                           <div className={styles.date}>
                             <DatePicker
                               onChange={(e) => {
-                                let fecha = new Date(e)
-                                  .toISOString()
-                                  .slice(0, 10);
+                                const year = e.getFullYear();
+                                const month = String(e.getMonth() + 1).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const day = String(e.getDate()).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const fecha = `${year}-${month}-${day}`;
                                 setArrival({ ...arrival, date: fecha });
                               }}
                               minDate={min}
@@ -824,21 +840,27 @@ export default function ModalTravel({ open, close, offices }) {
                       </Select>
                     </FormControl>
                   </div>
-
-                  
                 </div>
               </div>
-              {errorTime && <div style={{
-                color: 'red',
-                fontWeight: 500,
-                fontSize: 14
-              }}>Error: la fecha y la hora de llegada no puede ser antes que la de salida</div> }
+              {errorTime && (
+                <div
+                  style={{
+                    color: "red",
+                    fontWeight: 500,
+                    fontSize: 14,
+                  }}
+                >
+                  Error: la fecha y la hora de llegada no puede ser antes que la
+                  de salida
+                </div>
+              )}
 
               <div className={styles.buttons}>
                 <div className={styles.control}>
                   <Button
                     variant="contained"
                     size="large"
+                    disabled={loading}
                     onClick={() => {
                       if (
                         arrival.address === "" ||
@@ -863,6 +885,7 @@ export default function ModalTravel({ open, close, offices }) {
                     size="large"
                     color="error"
                     onClick={resetModal}
+                    disabled={loading}
                   >
                     Cancelar
                   </Button>
@@ -891,7 +914,13 @@ export default function ModalTravel({ open, close, offices }) {
                       <div className={styles.date}>
                         <DatePicker
                           onChange={(e) => {
-                            let fecha = new Date(e).toISOString().slice(0, 10);
+                            const year = e.getFullYear();
+                            const month = String(e.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(e.getDate()).padStart(2, "0");
+                            const fecha = `${year}-${month}-${day}`;
                             setScheduleDate(fecha);
                           }}
                           disabled={checked}
