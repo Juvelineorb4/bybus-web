@@ -257,7 +257,7 @@ export default function ModalTravel({ open, close, offices }) {
     horas = horas ? horas : 12;
     minutos = minutos < 10 ? "0" + minutos : minutos;
     let strTiempo = horas + ":" + minutos + " " + ampm;
-    let minutosRedondeados = Math.round(minutos / 15) * 15;
+    let minutosRedondeados = minutos < 10 ? `00` : Math.round(minutos / 15) * 15;
     if (minutosRedondeados >= 60) {
       minutosRedondeados = `00`;
     }
@@ -358,6 +358,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setEndDate(addDays(e, 7));
                                 setMin(e);
                               }}
+                              minDate={min}
                               defaultValue={fechaToday}
                             />
                           </div>
