@@ -162,6 +162,8 @@ export const listBookings = /* GraphQL */ `
         driver
         percentage
         transport
+        transportParking
+        transportFeatures
         createdAt
         updatedAt
       }

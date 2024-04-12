@@ -19,10 +19,10 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { MobileTimePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { time, transportes, venezuela, week } from "@/constants";
+import { features, time, transportes, venezuela, week } from "@/constants";
 import { Auth, API } from "aws-amplify";
 import * as queries from "@/graphql/queries";
-import * as mutations from "@/graphql/mutations";
+import * as mutations from "@/graphql/custom/mutations/employee";
 import {
   updateBooking as UPDATEBOOKING,
   createOrderDetail as CREATEORDERDETAILS,
@@ -38,7 +38,8 @@ export default function ModalTravelEdit({ data, open, close }) {
   const [stockVerify, setStockVerify] = useState(0);
   const [stock, setStock] = useState(data?.stock);
   const [isDisabled, setIsDisabled] = useState(false);
-  // console.log(stockVerify.toString().padStart(2, "0"))
+  const [parking, setParking] = useState("");
+  const [selectCharts, setSelectCharts] = useState([]);
   const [edit, setEdit] = useState(false);
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -50,7 +51,39 @@ export default function ModalTravelEdit({ data, open, close }) {
       },
     },
   };
-
+  const handleChangeCharts = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectCharts(typeof value === "string" ? value.split(",") : value);
+  };
+  const onEditTravel = async () => {
+    const params = {
+      id: data?.id,
+      transportParking: parking,
+      transportFeatures: selectCharts,
+    };
+    console.log(params);
+    try {
+      const update = await API.graphql({
+        query: mutations.updateBooking,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          input: params,
+        },
+      });
+      console.log(update);
+      close();
+      alert("Tu viaje fue actualizado correctamente");
+      location.reload();
+    } catch (error) {
+      console.log("EL ERROR:  ", error.Error);
+      alert(error);
+      close();
+      setParking("");
+      setSelectCharts([]);
+    }
+  };
   const onHandleOrder = async () => {
     let respuesta = window.confirm("¿Deseas agregar una comprar por taquilla?");
 
@@ -158,7 +191,12 @@ export default function ModalTravelEdit({ data, open, close }) {
     setPrice(data.price);
     setStockVerify(0);
     setStock(data?.stock);
-  }, [data]);
+    setParking(data?.transportParking);
+    if (edit === false) setSelectCharts(data?.transportFeatures);
+    if (edit === true) setSelectCharts([]);
+    console.log(data?.transportParking);
+    console.log(data?.transportFeatures);
+  }, [data, edit]);
 
   return (
     <div>
@@ -362,7 +400,7 @@ export default function ModalTravelEdit({ data, open, close }) {
                         label="Precio"
                         variant="outlined"
                         defaultValue={price ? price : data?.price}
-                        disabled={!edit}
+                        disabled
                         onChange={(e) => setPrice(e.target.value)}
                         sx={{ width: 200 }}
                       />
@@ -388,6 +426,53 @@ export default function ModalTravelEdit({ data, open, close }) {
                     </div>
                   </div>
                 </div>
+                <p>Opcionales</p>
+                <div
+                  style={{
+                    display: "flex",
+                  }}
+                >
+                  <TextField
+                    id="outlined-basic"
+                    label="Lugar del estacionamiento"
+                    variant="outlined"
+                    disabled={!edit}
+                    defaultValue={data?.transportParking}
+                    onChange={(e) => setParking(e.target.value)}
+                    sx={{
+                      width: 500,
+                    }}
+                  />
+
+                  <FormControl fullWidth style={{ marginLeft: "5px" }}>
+                    <InputLabel id="demo-multiple-checkbox-label">
+                      Caracteristicas del bus
+                    </InputLabel>
+                    <Select
+                      labelId="demo-multiple-checkbox-label"
+                      id="demo-multiple-checkbox"
+                      multiple
+                      value={selectCharts}
+                      onChange={handleChangeCharts}
+                      disabled={!edit}
+                      defaultValue={data?.transportFeatures}
+                      input={<OutlinedInput label="Caracteristicas del bus" />}
+                      renderValue={(selected) =>
+                        selected.map((charts) => features[charts]).join(", ")
+                      }
+                      MenuProps={MenuProps}
+                    >
+                      {Object.keys(features).map((charts) => (
+                        <MenuItem key={charts} value={charts}>
+                          {edit && <Checkbox
+                            checked={selectCharts.indexOf(charts) > -1}
+                          />}
+                          <ListItemText primary={features[charts]} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
               </div>
             </div>
 
@@ -398,11 +483,10 @@ export default function ModalTravelEdit({ data, open, close }) {
                   size="large"
                   onClick={() => {
                     if (edit) {
-                      close();
-                      setPrice(data?.price);
+                      onEditTravel();
+                      setEdit(!edit);
                     }
                     setEdit(!edit);
-                    setPrice(data?.price);
                   }}
                   disabled={isDisabled}
                 >

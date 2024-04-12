@@ -15,7 +15,8 @@ export const updateBooking = /* GraphQL */ `
   ) {
     updateBooking(input: $input, condition: $condition) {
       id
-      code
+      transportParking
+      transportFeatures
     }
   }
 `;

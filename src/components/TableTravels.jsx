@@ -45,33 +45,33 @@ const TableTravels = ({ rows, type }) => {
       width: 150,
       editable: true,
     },
-    {
-      field: "departure",
-      valueGetter: (params) => {
-        return new Date(params.value.date).toISOString().split("T")[0]; // Formatear la fecha como YYYY-MM-DD;
-      },
+    // {
+    //   field: "departure",
+    //   valueGetter: (params) => {
+    //     return new Date(params.value.date).toISOString().split("T")[0]; // Formatear la fecha como YYYY-MM-DD;
+    //   },
 
-      renderCell: (params) => {
-        const formattedDate = new Date(params.value)
-          .toISOString()
-          .split("T")[0]; // Formatear la fecha como YYYY-MM-DD
-        return <div>{formattedDate}</div>;
-      },
-      headerName: "Fecha (Salida)",
-      width: 129,
-    },
-    {
-      field: "departureTime",
-      valueGetter: (params) => {
-        return params.value.time.slice(0, 5); // Formatear la fecha como YYYY-MM-DD;
-      },
+    //   renderCell: (params) => {
+    //     const formattedDate = new Date(params.value)
+    //       .toISOString()
+    //       .split("T")[0]; // Formatear la fecha como YYYY-MM-DD
+    //     return <div>{formattedDate}</div>;
+    //   },
+    //   headerName: "Fecha (Salida)",
+    //   width: 129,
+    // },
+    // {
+    //   field: "departureTime",
+    //   valueGetter: (params) => {
+    //     return params.value.time.slice(0, 5); // Formatear la fecha como YYYY-MM-DD;
+    //   },
 
-      renderCell: (params) => {
-        return <div>{params.value}</div>;
-      },
-      headerName: "Hora (Salida)",
-      width: 129,
-    },
+    //   renderCell: (params) => {
+    //     return <div>{params.value}</div>;
+    //   },
+    //   headerName: "Hora (Salida)",
+    //   width: 129,
+    // },
     {
       field: "status",
       headerName: "Estado",
