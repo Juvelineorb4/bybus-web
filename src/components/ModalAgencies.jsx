@@ -35,7 +35,9 @@ export default function ModalAgencies({ open, close, data, type }) {
     close();
   };
   useEffect(() => {
+    console.log(data)
     if (open) {
+      setImage(data.image)
       setName(data.name);
       setEmail(data.email);
       setRif(data.rif);
@@ -245,9 +247,7 @@ export default function ModalAgencies({ open, close, data, type }) {
                           let reader = new FileReader();
                           reader.onload = function (event) {
                             let result = event.target.result;
-                            let resultReplace = result.replace(/^data:image\/\w+;base64,/, "")
-                            console.log('tamos',resultReplace)
-                            setBase64(resultReplace);
+                            setBase64(result);
                           };
                           reader.readAsDataURL(e.target.files[0]);
                           setImage(img);
