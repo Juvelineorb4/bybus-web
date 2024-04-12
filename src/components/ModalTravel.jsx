@@ -209,22 +209,22 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
-    return;
+
     try {
-      // const { data } = await API.graphql({
-      //   query: mutations.reprogram,
-      //   authMode: "AMAZON_COGNITO_USER_POOLS",
-      //   variables: { input: JSON.stringify(params) },
-      // });
-      // const result = JSON.parse(data?.reprogram);
-      // console.log("QUE TRAJO: ", result);
-      // if (result?.statusCode !== 200) {
-      //   throw new Error(`toy aqui manito ${result?.error}`);
-      // }
-      // resetModal();
-      // alert("Tu viaje fue creado correctamente");
-      // setIsLoading(!isLoading);
-      // location.reload();
+      return;
+      const { data } = await API.graphql({
+        query: mutations.reprogram,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: { input: JSON.stringify(params) },
+      });
+      const result = JSON.parse(data?.reprogram);
+      console.log("QUE TRAJO: ", result);
+      if (result?.statusCode !== 200) {
+        throw new Error(`toy aqui manito ${result?.error}`);
+      }
+      resetModal();
+      alert("Tu viaje fue creado correctamente");
+      setIsLoading(!isLoading);
     } catch (error) {
       console.log("EL ERROR:  ", error.Error);
       alert(error);
@@ -257,7 +257,8 @@ export default function ModalTravel({ open, close, offices }) {
     horas = horas ? horas : 12;
     minutos = minutos < 10 ? "0" + minutos : minutos;
     let strTiempo = horas + ":" + minutos + " " + ampm;
-    let minutosRedondeados = Math.round(minutos / 15) * 15;
+    let minutosRedondeados =
+      minutos < 10 ? "00" : Math.round(minutos / 15) * 15;
     if (minutosRedondeados >= 60) {
       minutosRedondeados = `00`;
     }
@@ -366,6 +367,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setMin(e);
                               }}
                               defaultValue={fechaToday}
+                              minDate={min}
                             />
                           </div>
                           <div className={styles.time}>
