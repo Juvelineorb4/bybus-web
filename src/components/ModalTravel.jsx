@@ -176,11 +176,11 @@ export default function ModalTravel({ open, close, offices }) {
     let dateD = new Date(`${departure.date}T` + timeD + "Z");
     let dateA = new Date(`${arrival.date}T` + timeA + "Z");
     if (dateA < dateD) {
-      console.log('tamos aqui')
-      setErrorTime(true)
-      return
+      console.log("tamos aqui");
+      setErrorTime(true);
+      return;
     }
-    setErrorTime(false)
+    setErrorTime(false);
 
     const params = {
       booking: {
@@ -376,7 +376,6 @@ export default function ModalTravel({ open, close, offices }) {
                               }}
                               minDate={min}
                               defaultValue={fechaToday}
-                              minDate={min}
                             />
                           </div>
                           <div className={styles.time}>
@@ -838,15 +837,20 @@ export default function ModalTravel({ open, close, offices }) {
                       </Select>
                     </FormControl>
                   </div>
-
-                  
                 </div>
               </div>
-              {errorTime && <div style={{
-                color: 'red',
-                fontWeight: 500,
-                fontSize: 14
-              }}>Error: la fecha y la hora de llegada no puede ser antes que la de salida</div> }
+              {errorTime && (
+                <div
+                  style={{
+                    color: "red",
+                    fontWeight: 500,
+                    fontSize: 14,
+                  }}
+                >
+                  Error: la fecha y la hora de llegada no puede ser antes que la
+                  de salida
+                </div>
+              )}
 
               <div className={styles.buttons}>
                 <div className={styles.control}>
