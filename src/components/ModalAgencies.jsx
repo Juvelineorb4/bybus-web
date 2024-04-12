@@ -245,7 +245,9 @@ export default function ModalAgencies({ open, close, data, type }) {
                           let reader = new FileReader();
                           reader.onload = function (event) {
                             let result = event.target.result;
-                            setBase64(result);
+                            let resultReplace = result.replace(/^data:image\/\w+;base64,/, "")
+                            console.log('tamos',resultReplace)
+                            setBase64(resultReplace);
                           };
                           reader.readAsDataURL(e.target.files[0]);
                           setImage(img);
