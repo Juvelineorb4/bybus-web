@@ -40,6 +40,7 @@ export default function ModalTravel({ open, close, offices }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [min, setMin] = useState(null);
+  const [minD, setMinD] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [parking, setParking] = useState("");
   const [selectCharts, setSelectCharts] = useState([]);
@@ -256,7 +257,7 @@ export default function ModalTravel({ open, close, offices }) {
     });
     setStartDate(fechaToday);
     setEndDate(addDays(fechaToday, 7));
-    setMin(fechaToday);
+    setMinD(fechaToday);
     setArrival({ ...arrival, date: fechaMasUnDia });
     let horas = fechaToday.getHours();
     let minutos = fechaToday.getMinutes();
@@ -367,7 +368,7 @@ export default function ModalTravel({ open, close, offices }) {
                                 setEndDate(addDays(e, 7));
                                 setMin(e);
                               }}
-                              minDate={min}
+                              minDate={minD}
                               defaultValue={fechaToday}
                             />
                           </div>
