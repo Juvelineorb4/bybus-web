@@ -150,17 +150,28 @@ export default function ModalTravel({ open, close, offices }) {
   const onCreateTravel = async () => {
     setBtnDisabled(true);
     let timeD =
-      timeDeparture.mode === "PM"
+      timeDeparture.mode === "AM" && timeDeparture.hour == 12
+        ? "00:" + timeDeparture.minutes + ":00.000"
+        : timeDeparture.mode === "PM" && timeDeparture.hour != 12
         ? Number(timeDeparture.hour) +
           12 +
           ":" +
           timeDeparture.minutes +
           ":00.000"
-        : timeDeparture.hour + ":" + timeDeparture.minutes + ":00.000";
+        : timeDeparture.hour.padStart(2, "0") +
+          ":" +
+          timeDeparture.minutes +
+          ":00.000";
+
     let timeA =
-      timeArrival.mode === "PM"
+      timeArrival.mode === "AM" && timeArrival.hour == 12
+        ? "00:" + timeArrival.minutes + ":00.000"
+        : timeArrival.mode === "PM" && timeArrival.hour != 12
         ? Number(timeArrival.hour) + 12 + ":" + timeArrival.minutes + ":00.000"
-        : timeArrival.hour + ":" + timeArrival.minutes + ":00.000";
+        : timeArrival.hour.padStart(2, "0") +
+          ":" +
+          timeArrival.minutes +
+          ":00.000";
 
     const params = {
       booking: {
@@ -198,6 +209,7 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
+    return;
     try {
       // const { data } = await API.graphql({
       //   query: mutations.reprogram,
