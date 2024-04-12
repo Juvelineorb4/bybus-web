@@ -46,6 +46,7 @@ export default function ModalTravel({ open, close, offices }) {
   const [percentage, setPercentage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [errorTime, setErrorTime] = useState(false);
   let fechaToday = new Date();
   let fechaInitialArrival = new Date();
   fechaInitialArrival.setDate(fechaInitialArrival.getDate() + 1);
@@ -172,6 +173,14 @@ export default function ModalTravel({ open, close, offices }) {
           ":" +
           timeArrival.minutes +
           ":00.000";
+    let dateD = new Date(`${departure.date}T` + timeD + "Z");
+    let dateA = new Date(`${arrival.date}T` + timeA + "Z");
+    if (dateA < dateD) {
+      console.log('tamos aqui')
+      setErrorTime(true)
+      return
+    }
+    setErrorTime(false)
 
     const params = {
       booking: {
@@ -209,7 +218,6 @@ export default function ModalTravel({ open, close, offices }) {
       },
     };
     console.log(params);
-    return;
     try {
       const { data } = await API.graphql({
         query: mutations.reprogram,
@@ -257,7 +265,8 @@ export default function ModalTravel({ open, close, offices }) {
     horas = horas ? horas : 12;
     minutos = minutos < 10 ? "0" + minutos : minutos;
     let strTiempo = horas + ":" + minutos + " " + ampm;
-    let minutosRedondeados = minutos < 10 ? `00` : Math.round(minutos / 15) * 15;
+    let minutosRedondeados =
+      minutos < 10 ? `00` : Math.round(minutos / 15) * 15;
     if (minutosRedondeados >= 60) {
       minutosRedondeados = `00`;
     }
@@ -815,346 +824,14 @@ export default function ModalTravel({ open, close, offices }) {
                     </FormControl>
                   </div>
 
-                  {/* <p>Paradas</p> */}
-                  {/* <div className={styles.stop}>
-                    <div className={styles.stopBooking}>
-                      {stopQ && (
-                        <div className={styles.stopForm}>
-                          {stopQ.map((item, index) => (
-                            <div className={styles.stopContent} key={index}>
-                              <div className={styles.inputTravel}>
-                                <FormControl fullWidth>
-                                  <InputLabel id="demo-simple-select-label">
-                                    Estado
-                                  </InputLabel>
-                                  <Select
-                                    labelId="demo-simple-select-label"
-                                    value={item.state}
-                                    label="Estado"
-                                    onChange={(e) => {
-                                      const updateStop = stopQ.map(
-                                        (stop, stopIndex) => {
-                                          if (index === stopIndex) {
-                                            return {
-                                              ...stop,
-                                              state: e.target.value,
-                                            };
-                                          }
-                                          return stop;
-                                        }
-                                      );
-                                      setStopQ(updateStop);
-                                    }}
-                                  >
-                                    {venezuela.map((item, index) => (
-                                      <MenuItem value={item.estado} key={index}>
-                                        {item.estado}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                                <FormControl fullWidth>
-                                  <InputLabel id="demo-simple-select-label">
-                                    Ciudad
-                                  </InputLabel>
-                                  <Select
-                                    labelId="demo-simple-select-label"
-                                    value={item.city}
-                                    label="Ciudad"
-                                    onChange={(e) => {
-                                      const updateStop = stopQ.map(
-                                        (stop, stopIndex) => {
-                                          if (index === stopIndex) {
-                                            return {
-                                              ...stop,
-                                              city: e.target.value,
-                                            };
-                                          }
-                                          return stop;
-                                        }
-                                      );
-                                      setStopQ(updateStop);
-                                    }}
-                                  >
-                                    {venezuela.map((group, index) =>
-                                      item.state === group.estado
-                                        ? group.ciudades.map((city, index) => (
-                                            <MenuItem value={city} key={index}>
-                                              {city}
-                                            </MenuItem>
-                                          ))
-                                        : ""
-                                    )}
-                                  </Select>
-                                </FormControl>
-
-                        
-                              </div>
-                              <div className={styles.inputTravelOther}>
-                                <TextField
-                                  id="outlined-basic"
-                                  label="Direccion"
-                                  variant="outlined"
-                                  onChange={(e) => {
-                                    const updateStop = stopQ.map(
-                                      (stop, stopIndex) => {
-                                        if (index === stopIndex) {
-                                          return {
-                                            ...stop,
-                                            address: e.target.value,
-                                          };
-                                        }
-                                        return stop;
-                                      }
-                                    );
-                                    setStopQ(updateStop);
-                                  }}
-                                  sx={{
-                                    width: 560,
-                                  }}
-                                />
-                                <TextField
-                                  id="outlined-basic"
-                                  label="Precio del ticket de la parada"
-                                  variant="outlined"
-                                  onChange={(e) => {
-                                    const updateStop = stopQ.map(
-                                      (stop, stopIndex) => {
-                                        if (index === stopIndex) {
-                                          return {
-                                            ...stop,
-                                            price: e.target.value,
-                                          };
-                                        }
-                                        return stop;
-                                      }
-                                    );
-                                    setStopQ(updateStop);
-                                  }}
-                                  sx={{
-                                    width: 315,
-                                  }}
-                                />
-                              </div>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                startIcon={<AddRoundedIcon />}
-                                onClick={() =>
-                                  setStopQ((e) => {
-                                    let nuevoArreglo = [...e];
-                                    nuevoArreglo.splice(index, 1);
-                                    return nuevoArreglo;
-                                  })
-                                }
-                                className={styles.deleteStop}
-                              >
-                                Eliminar
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="contained"
-                      size="medium"
-                      startIcon={<AddRoundedIcon />}
-                      onClick={() =>
-                        setStopQ([
-                          ...stopQ,
-                          {
-                            state: "",
-                            city: "",
-                            time: "",
-                            date: "",
-                            address: "",
-                            price: "",
-                          },
-                        ])
-                      }
-                    >
-                      Agregar una parada
-                    </Button>
-                  </div> */}
+                  
                 </div>
               </div>
-              {/* <div className={styles.datetime}> */}
-              {/* <LocalizationProvider
-                                    dateAdapter={AdapterDayjs}
-                                  > */}
-              {/* <div className={styles.dateStop}>
-                                      <DatePicker
-                                        onChange={(e) => {
-                                          const options = {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                          };
-                                          let fecha = new Date(e)
-                                            .toISOString()
-                                            .slice(0, 10);
-                                          const updateStop = stopQ.map(
-                                            (stop, stopIndex) => {
-                                              if (index === stopIndex) {
-                                                return {
-                                                  ...stop,
-                                                  date: fecha,
-                                                };
-                                              }
-                                              return stop;
-                                            }
-                                          );
-                                          setStopQ(updateStop);
-                                        }}
-                                      />
-                                    </div> */}
-              {/* <div className={styles.timeStop}> */}
-              {/* <div className={styles.time}>
-                                        <FormControl
-                                          className={styles.timeInput}
-                                        >
-                                          <InputLabel id="demo-simple-select-label">
-                                            00:00
-                                          </InputLabel>
-                                          <Select
-                                            labelId="demo-simple-select-label"
-                                            label="Hora"
-                                            value={departure.time.hour}
-                                            onChange={(e) => {
-                                              let hour = e.target.value;
-                                              const updateStop = stopQ.map(
-                                                (stop, stopIndex) => {
-                                                  if (index === stopIndex) {
-                                                    return {
-                                                      ...stop,
-                                                      time: {
-                                                        hour: hour,
-                                                      },
-                                                    };
-                                                  }
-                                                  return stop;
-                                                }
-                                              );
-                                              setStopQ(updateStop);
-                                            }}
-                                          >
-                                            {time.hour.map((item, index) => (
-                                              <MenuItem
-                                                value={item}
-                                                key={index}
-                                              >
-                                                {item}
-                                              </MenuItem>
-                                            ))}
-                                          </Select>
-                                        </FormControl>
-                                        <FormControl
-                                          className={styles.timeInput}
-                                        >
-                                          <InputLabel id="demo-simple-select-label">
-                                            00:00
-                                          </InputLabel>
-                                          <Select
-                                            labelId="demo-simple-select-label"
-                                            label="Minutos"
-                                            value={departure.time.minutes}
-                                            onChange={(e) => {
-                                              let minutes = e.target.value;
-                                              const updateStop = stopQ.map(
-                                                (stop, stopIndex) => {
-                                                  if (index === stopIndex) {
-                                                    return {
-                                                      ...stop,
-                                                      time: {
-                                                        minutes: minutes,
-                                                      },
-                                                    };
-                                                  }
-                                                  return stop;
-                                                }
-                                              );
-                                              setStopQ(updateStop);
-                                            }}
-                                          >
-                                            {time.minutes.map((item, index) => (
-                                              <MenuItem
-                                                value={item}
-                                                key={index}
-                                              >
-                                                {item}
-                                              </MenuItem>
-                                            ))}
-                                          </Select>
-                                        </FormControl>
-                                        <FormControl
-                                          className={styles.timeInput}
-                                        >
-                                          <InputLabel id="demo-simple-select-label">
-                                            AM
-                                          </InputLabel>
-                                          <Select
-                                            labelId="demo-simple-select-label"
-                                            label="Mode"
-                                            value={departure.time.mode}
-                                            onChange={(e) => {
-                                              let mode = e.target.value;
-                                              const updateStop = stopQ.map(
-                                                (stop, stopIndex) => {
-                                                  if (index === stopIndex) {
-                                                    return {
-                                                      ...stop,
-                                                      time: {
-                                                        mode: mode,
-                                                      },
-                                                    };
-                                                  }
-                                                  return stop;
-                                                }
-                                              );
-                                              setStopQ(updateStop);
-                                            }}
-                                          >
-                                            {time.mode.map((item, index) => (
-                                              <MenuItem
-                                                value={item}
-                                                key={index}
-                                              >
-                                                {item}
-                                              </MenuItem>
-                                            ))}
-                                          </Select>
-                                        </FormControl>
-                                      </div> */}
-              {/* <MobileTimePicker
-                                        defaultValue={dayjs("2022-04-17T15:30")}
-                                        onChange={(e) => {
-                                          const options = {
-                                            hour12: false,
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            fractionalSecondDigits: 3,
-                                          };
-                                          let time = new Date(
-                                            e
-                                          ).toLocaleTimeString("en", options);
-                                          const updateStop = stopQ.map(
-                                            (stop, stopIndex) => {
-                                              if (index === stopIndex) {
-                                                return {
-                                                  ...stop,
-                                                  time: time,
-                                                };
-                                              }
-                                              return stop;
-                                            }
-                                          );
-                                          setStopQ(updateStop);
-                                        }}
-                                      /> */}
-              {/* </div> */}
-              {/* </LocalizationProvider> */}
-              {/* </div> */}
+              {errorTime && <div style={{
+                color: 'red',
+                fontWeight: 500,
+                fontSize: 14
+              }}>Error: la fecha y la hora de llegada no puede ser antes que la de salida</div> }
 
               <div className={styles.buttons}>
                 <div className={styles.control}>
