@@ -16,7 +16,12 @@ export const week = {
   FRIDAY: "VIERNES",
   SATURDAY: "SABADO",
 };
-
+export const features = {
+  WIFI: 'WIFI',
+  ENCHUFE: 'ENCHUFE',
+  BANO: 'BAÑO',
+  AIRE: 'AIRE ACONDICIONADO'
+};
 export const transportes = ["EXPRESO", "ENCAVA", "BUSCAMA"];
 
 export const time = {

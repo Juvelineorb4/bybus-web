@@ -10,7 +10,14 @@ import * as mutation from "@/graphql/custom/mutations/profile";
 const TableTravels = ({ rows, type }) => {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
-  const filteredData = rows.filter((item) => item.status !== "CANCELLED");
+  const filteredData = rows
+    .map((item) => {
+      return {
+        ...item,
+        departureTime: item.departure,
+      };
+    })
+    .filter((item) => item.status !== "CANCELLED");
   const DeleteBooking = async (bookingId) => {
     const booking = await API.graphql({
       query: mutation.updateBooking,
@@ -23,7 +30,7 @@ const TableTravels = ({ rows, type }) => {
       },
     });
   };
-  console.log(filteredData);
+
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
@@ -40,15 +47,29 @@ const TableTravels = ({ rows, type }) => {
     },
     {
       field: "departure",
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <div>{params.formattedValue.date}</div>
-            <div>{params.formattedValue.time.slice(0, 5)}</div>
-          </Stack>
-        );
+      valueGetter: (params) => {
+        return new Date(params.value.date).toISOString().split("T")[0]; // Formatear la fecha como YYYY-MM-DD;
       },
-      headerName: "Fecha y Hora",
+
+      renderCell: (params) => {
+        const formattedDate = new Date(params.value)
+          .toISOString()
+          .split("T")[0]; // Formatear la fecha como YYYY-MM-DD
+        return <div>{formattedDate}</div>;
+      },
+      headerName: "Fecha (Salida)",
+      width: 129,
+    },
+    {
+      field: "departureTime",
+      valueGetter: (params) => {
+        return params.value.time.slice(0, 5); // Formatear la fecha como YYYY-MM-DD;
+      },
+
+      renderCell: (params) => {
+        return <div>{params.value}</div>;
+      },
+      headerName: "Hora (Salida)",
       width: 129,
     },
     {
