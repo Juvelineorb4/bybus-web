@@ -25,7 +25,6 @@ import { useRouter } from "next/router";
 
 const Dashboard = ({ dataResult, userType }) => {
   const router = useRouter().query;
-  console.log("ROUTER", router);
   const [travels, setTravels] = useState(false);
   const [travel, setTravel] = useState("");
   const [transport, setTransport] = useState(false);
@@ -52,25 +51,38 @@ const Dashboard = ({ dataResult, userType }) => {
     // console.log(dataResult.id)
 
     setData(list?.data?.getEmployee);
-    const travels = await API.graphql({
-      query: queries.listBookings,
-      authMode: "AMAZON_COGNITO_USER_POOLS",
-      variables: {
-        filter: {
-          agencyID: { eq: list?.data?.getEmployee?.agencyID },
-          // createdBy: { eq: router.id },
+
+
+    const fetchAllBookings = async (nextToken, result = []) => {
+      const response = await API.graphql({
+        query: queries.getBookingbyAgencyID,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          agencyID: list?.data?.getEmployee?.agencyID,
+          nextToken,
         },
-      },
-    });
-    // let array = travels?.data.listBookings.items.sort(
+      });
+
+      const items = response.data.getBookingbyAgencyID.items;
+      result.push(...items);
+
+      if (response.data.getBookingbyAgencyID.nextToken) {
+        return fetchAllBookings(response.data.getBookingbyAgencyID.nextToken, result);
+      }
+
+      return result;
+    };
+
+    const allBookings = await fetchAllBookings();
+    console.log(allBookings);
+    // let array = allBookings.sort(
     //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     // );
-    let aprobados = travels?.data.listBookings.items.filter(
-      (obj) => obj.status === "AVAILABLE"
-    );
-    let cancelados = travels?.data.listBookings.items.filter(
-      (obj) => obj.status !== "AVAILABLE"
-    );
+    let aprobados = allBookings.filter((obj) => obj.status === "AVAILABLE");
+    let cancelados = allBookings.filter((obj) => obj.status !== "AVAILABLE");
+    console.log("aprobados:", aprobados);
+    console.log("cancelados:", aprobados);
+    console.log("todos:", allBookings);
     aprobados.sort(
       (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     );
@@ -81,7 +93,6 @@ const Dashboard = ({ dataResult, userType }) => {
     let arrayFilter = resultado.filter(
       (objeto) => objeto.officeID === dataResult.officeID
     );
-    console.log('toy q', arrayFilter)
     setDataTravels(arrayFilter);
   };
 

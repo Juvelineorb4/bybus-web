@@ -2335,15 +2335,15 @@ export const getBookingbyCode = /* GraphQL */ `
     }
   }
 `;
-export const bookingsByAgencyID = /* GraphQL */ `
-  query BookingsByAgencyID(
+export const getBookingbyAgencyID = /* GraphQL */ `
+  query GetBookingbyAgencyID(
     $agencyID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelBookingFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    bookingsByAgencyID(
+    getBookingbyAgencyID(
       agencyID: $agencyID
       sortDirection: $sortDirection
       filter: $filter
@@ -2484,15 +2484,15 @@ export const bookingsByAgencyID = /* GraphQL */ `
     }
   }
 `;
-export const bookingsByOfficeID = /* GraphQL */ `
-  query BookingsByOfficeID(
+export const listBookingbyOfficeID = /* GraphQL */ `
+  query ListBookingbyOfficeID(
     $officeID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelBookingFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    bookingsByOfficeID(
+    listBookingbyOfficeID(
       officeID: $officeID
       sortDirection: $sortDirection
       filter: $filter

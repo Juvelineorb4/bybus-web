@@ -201,6 +201,8 @@ export const listAgencies = /* GraphQL */ `
             stock
             price
             percentage
+            transportParking
+            transportFeatures
             createdBy
             driver
             transport
@@ -389,6 +391,8 @@ export const listOffices = /* GraphQL */ `
             price
             percentage
             createdBy
+            transportParking
+            transportFeatures
             driver
             transport
             createdAt
@@ -474,6 +478,8 @@ export const getAgency = /* GraphQL */ `
           price
           createdBy
           driver
+          transportParking
+          transportFeatures
           transport
           createdAt
           updatedAt
@@ -520,6 +526,8 @@ export const listOrderDetails = /* GraphQL */ `
           status
           code
           agencyID
+          transportParking
+          transportFeatures
           officeID
           departureCity
           arrivalCity
@@ -626,6 +634,8 @@ export const getOrderDetail = /* GraphQL */ `
         stock
         price
         createdBy
+        transportParking
+        transportFeatures
         driver
         transport
         createdAt
@@ -743,6 +753,8 @@ export const listAgenciesCSV = /* GraphQL */ `
             status
             code
             agencyID
+            transportParking
+            transportFeatures
             agency {
               id
               cognitoID
@@ -920,6 +932,8 @@ export const listBookings = /* GraphQL */ `
               code
               driver
               transport
+              transportParking
+              transportFeatures
               stock
               status
               departure {
@@ -941,6 +955,8 @@ export const listBookings = /* GraphQL */ `
         stock
         price
         percentage
+        transportParking
+        transportFeatures
         transport
         __typename
       }
