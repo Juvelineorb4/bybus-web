@@ -73,7 +73,7 @@ const TableOffices = ({ rows }) => {
                 setData(params.row);
                 setOpen(!open);
               }}
-            >{`Editar`}</button>
+            >{Editar}</button>
             <button
               onClick={() => {
                 let opcion = confirm(
@@ -86,7 +86,7 @@ const TableOffices = ({ rows }) => {
                   alert("Has cancelado con exito");
                 }
               }}
-            >{`Eliminar`}</button>
+            >{Eliminar}</button>
           </Stack>
         );
       },
@@ -118,7 +118,7 @@ const TableOffices = ({ rows }) => {
           },
         }}
         localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-        density={`compact`}
+        density={compact}
         pageSizeOptions={[10]}
         disableRowSelectionOnClick={true}
         slots={{ toolbar: GridToolbar }}
