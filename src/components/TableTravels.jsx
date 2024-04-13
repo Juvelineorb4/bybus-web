@@ -45,6 +45,19 @@ const TableTravels = ({ rows, type }) => {
       width: 150,
       editable: true,
     },
+    {
+      field: "departure",
+      renderCell: (params) => {
+        return (
+          <Stack>
+            <div>{params.formattedValue.date}</div>
+            <div>{params.formattedValue.time.slice(0, 5)}</div>
+          </Stack>
+        );
+      },
+      headerName: "Fecha y Hora",
+      width: 129,
+    },
     // {
     //   field: "departure",
     //   valueGetter: (params) => {

@@ -8,7 +8,15 @@ import * as queries from "@/graphql/custom/queries/home";
 import * as subscriptions from "@/graphql/custom/subscriptions/home";
 import TableEmployees from "@/components/TableEmployees";
 import TableOffices from "@/components/TableOffices";
-import { InputLabel, FormControl, MenuItem, Select, Autocomplete, Box, TextField } from "@mui/material";
+import {
+  InputLabel,
+  FormControl,
+  MenuItem,
+  Select,
+  Autocomplete,
+  Box,
+  TextField,
+} from "@mui/material";
 import TableTravels from "../TableTravels";
 
 const Dashboard = ({ dataResult, userType }) => {
@@ -22,7 +30,9 @@ const Dashboard = ({ dataResult, userType }) => {
   const [officeList, setOfficeList] = useState("");
   const [officeListT, setOfficeListT] = useState("");
   const [employeeListT, setEmployeeListT] = useState("");
-  const filteredData =  dataOfficeTravel?.bookings?.items?.filter(item => item.createdBy === employeeListT);
+  const filteredData = dataOfficeTravel?.bookings?.items?.filter(
+    (item) => item.createdBy === employeeListT
+  );
   const openOffice = () => {
     setOffice(true);
   };
@@ -59,14 +69,39 @@ const Dashboard = ({ dataResult, userType }) => {
         id: officeListT,
       },
     });
-    let array = list?.data?.getOffice?.bookings?.items.sort((a, b) => new Date(a.departure.date) - new Date(b.departure.date));
+    const fetchAllBookings = async (nextToken, result = []) => {
+      const response = await API.graphql({
+        query: queries.listBookingbyOfficeID,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          officeID: officeListT,
+          nextToken,
+        },
+      });
 
-    let aprobados = list?.data?.getOffice?.bookings?.items.filter(
-      (obj) => obj.status === "AVAILABLE"
-    );
-    let cancelados = list?.data?.getOffice?.bookings?.items.filter(
-      (obj) => obj.status !== "AVAILABLE"
-    );
+      const items = response.data.listBookingbyOfficeID.items;
+      result.push(...items);
+
+      if (response.data.listBookingbyOfficeID.nextToken) {
+        return fetchAllBookings(
+          response.data.listBookingbyOfficeID.nextToken,
+          result
+        );
+      }
+
+      return result;
+    };
+
+    const allBookings = await fetchAllBookings();
+    console.log(allBookings);
+    // let array = allBookings.sort(
+    //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+    // );
+    let aprobados = allBookings.filter((obj) => obj.status === "AVAILABLE");
+    let cancelados = allBookings.filter((obj) => obj.status !== "AVAILABLE");
+    console.log("aprobados:", aprobados);
+    console.log("cancelados:", cancelados);
+    console.log("todos:", allBookings);
     aprobados.sort(
       (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     );
@@ -74,19 +109,19 @@ const Dashboard = ({ dataResult, userType }) => {
       (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     );
     let resultado = [...aprobados, ...cancelados];
+    console.log(resultado);
     // let arrayFilter = resultado.filter(
     //   (objeto) => objeto.createdBy === dataResult.id
     // );
-      console.log(resultado)
-    console.log('AQUI MI BRO', list?.data?.getOffice)
     setDataTravels(resultado);
+    console.log(list?.data?.getOffice)
     setDataOfficeTravel(list?.data?.getOffice);
   };
 
   useEffect(() => {
     if (!office) Agency();
     if (officeList) Employees();
-    if (officeListT) OfficeTravels()
+    if (officeListT) OfficeTravels();
   }, [office, employee, officeList, officeListT]);
 
   return (
@@ -112,7 +147,7 @@ const Dashboard = ({ dataResult, userType }) => {
 
           <div className={styles.agencies}>
             <div className={styles.title}>
-              <h2 style={{fontWeight: 'bold'}}>Lista de Oficinas</h2>
+              <h2 style={{ fontWeight: "bold" }}>Lista de Oficinas</h2>
             </div>
             {data?.officies?.items && (
               <TableOffices rows={data?.officies?.items} />
@@ -120,16 +155,14 @@ const Dashboard = ({ dataResult, userType }) => {
           </div>
           <div className={styles.agencies}>
             <div className={styles.title}>
-              <h2 style={{fontWeight: 'bold'}}>Lista de Empleados</h2>
+              <h2 style={{ fontWeight: "bold" }}>Lista de Empleados</h2>
             </div>
             <FormControl fullWidth>
               <Autocomplete
                 disablePortal
                 id="combo-box-demo"
                 // getOptionLabel={(option) => option.rif}
-                isOptionEqualToValue={(option, value) =>
-                  option.id === value.id
-                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 options={data?.officies?.items}
                 value={officeList}
                 renderOption={(props, option) => (
@@ -157,71 +190,80 @@ const Dashboard = ({ dataResult, userType }) => {
           </div>
           <div className={styles.agencies}>
             <div className={styles.title}>
-              <h2 style={{fontWeight: 'bold'}}>Lista de Viajes</h2>
+              <h2 style={{ fontWeight: "bold" }}>Lista de Viajes</h2>
             </div>
             <div className={styles.inputs}>
-            <FormControl sx={{
-                width: 500,
-              }}>
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                // getOptionLabel={(option) => option.rif}
-                isOptionEqualToValue={(option, value) =>
-                  option.id === value.id
-                }
-                options={data?.officies?.items}
-                value={officeListT}
-                renderOption={(props, option) => (
-                  <Box component="li" {...props}>
-                    <div
-                      onClick={() => {
-                        setOfficeListT(option.id);
-                      }}
-                      style={{
-                        fontSize: 12
-                      }}
-                    >{`Nombre: ${option.name} - Estado: ${option.state} - Ciudad: ${option.city}`}</div>
-                  </Box>
-                )}
-                renderInput={(params) => (
-                  <TextField {...params} label="Seleccionar oficina" />
-                )}
-              />
-            </FormControl>
-            <FormControl sx={{
-                width: 400,
-              }}>
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                // getOptionLabel={(option) => option.rif}
-                isOptionEqualToValue={(option, value) =>
-                  option.id === value.id
-                }
-                disabled={!officeListT}
-                options={dataOfficeTravel.length !== 0 && dataOfficeTravel?.employees?.items}
-                value={employeeListT}
-                renderOption={(props, option) => (
-                  <Box component="li" {...props}>
-                    <div
-                      onClick={() => {
-                        setEmployeeListT(option.id);
-                      }}
-                      style={{
-                        fontSize: 12
-                      }}
-                    >{`Nombre: ${option.name} - Telefono: ${option.phone} - Email: ${option.email}`}</div>
-                  </Box>
-                )}
-                renderInput={(params) => (
-                  <TextField {...params} label="Seleccionar empleado" />
-                )}
-              />
-            </FormControl>
+              <FormControl
+                sx={{
+                  width: 500,
+                }}
+              >
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  // getOptionLabel={(option) => option.rif}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
+                  options={data?.officies?.items}
+                  value={officeListT}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props}>
+                      <div
+                        onClick={() => {
+                          setOfficeListT(option.id);
+                        }}
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >{`Nombre: ${option.name} - Estado: ${option.state} - Ciudad: ${option.city}`}</div>
+                    </Box>
+                  )}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Seleccionar oficina" />
+                  )}
+                />
+              </FormControl>
+              <FormControl
+                sx={{
+                  width: 400,
+                }}
+              >
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  // getOptionLabel={(option) => option.rif}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
+                  disabled={!officeListT}
+                  options={
+                    dataOfficeTravel.length !== 0 &&
+                    dataOfficeTravel?.employees?.items
+                  }
+                  value={employeeListT}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props}>
+                      <div
+                        onClick={() => {
+                          setEmployeeListT(option.id);
+                        }}
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >{`Nombre: ${option.name} - Telefono: ${option.phone} - Email: ${option.email}`}</div>
+                    </Box>
+                  )}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Seleccionar empleado" />
+                  )}
+                />
+              </FormControl>
             </div>
-            
-            {employeeListT ? <TableTravels type={`employee`} rows={filteredData} /> : dataOfficeTravel?.bookings?.items ? (
+
+            {employeeListT ? (
+              <TableTravels type={`employee`} rows={filteredData} />
+            ) : dataOfficeTravel?.bookings?.items ? (
               <TableTravels type={`dash`} rows={dataTravels} />
             ) : (
               <div className={styles.nothingTable}>

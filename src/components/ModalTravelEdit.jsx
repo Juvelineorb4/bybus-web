@@ -36,9 +36,9 @@ export default function ModalTravelEdit({ data, open, close }) {
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState(data.price);
   const [stockVerify, setStockVerify] = useState(0);
-  const [stock, setStock] = useState(data?.stock);
+  const [stock, setStock] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [parking, setParking] = useState("");
+  const [parking, setParking] = useState(data?.transportParking);
   const [selectCharts, setSelectCharts] = useState([]);
   const [edit, setEdit] = useState(false);
   const ITEM_HEIGHT = 48;
@@ -63,7 +63,7 @@ export default function ModalTravelEdit({ data, open, close }) {
       transportParking: parking,
       transportFeatures: selectCharts,
     };
-    console.log(params);
+    console.log("params", params);
     try {
       const update = await API.graphql({
         query: mutations.updateBooking,
@@ -72,7 +72,7 @@ export default function ModalTravelEdit({ data, open, close }) {
           input: params,
         },
       });
-      console.log(update);
+      console.log("AQUIII", update);
       close();
       alert("Tu viaje fue actualizado correctamente");
       location.reload();
@@ -165,7 +165,9 @@ export default function ModalTravelEdit({ data, open, close }) {
   };
 
   useEffect(() => {
+    console.log(data.stock);
     setStockVerify(data?.stock);
+    setStock(data?.stock);
 
     const updateSub = API.graphql({
       query: subscriptions.onUpdateBooking,
@@ -183,20 +185,7 @@ export default function ModalTravelEdit({ data, open, close }) {
     return () => {
       updateSub.unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    console.log("DATA: ", data);
-    setQuantity("");
-    setPrice(data.price);
-    setStockVerify(0);
-    setStock(data?.stock);
-    setParking(data?.transportParking);
-    if (edit === false) setSelectCharts(data?.transportFeatures);
-    if (edit === true) setSelectCharts([]);
-    console.log(data?.transportParking);
-    console.log(data?.transportFeatures);
-  }, [data, edit]);
+  }, [data]);
 
   return (
     <div>
@@ -217,44 +206,20 @@ export default function ModalTravelEdit({ data, open, close }) {
                   <div className={styles.departure}>
                     <p>Salida</p>
                     <div className={styles.form}>
-                      <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">
-                          Estado
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          label="Estado"
-                          defaultValue={data?.departure?.state}
-                          disabled
-                        >
-                          {venezuela.map((item, index) => (
-                            <MenuItem value={item.estado} key={index}>
-                              {item.estado}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">
-                          Ciudad
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          label="Ciudad"
-                          defaultValue={data?.departure?.city}
-                          disabled
-                        >
-                          {venezuela.map((item, index) =>
-                            data?.departure?.state === item.estado
-                              ? item.ciudades.map((city, index) => (
-                                  <MenuItem value={city} key={index}>
-                                    {city}
-                                  </MenuItem>
-                                ))
-                              : ""
-                          )}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        id="outlined-basic"
+                        variant="outlined"
+                        label="Estado"
+                        defaultValue={data?.departure?.state}
+                        disabled
+                      />
+                      <TextField
+                        id="outlined-basic"
+                        variant="outlined"
+                        label="Ciudad"
+                        defaultValue={data?.departure?.city}
+                        disabled
+                      />
                     </div>
                     <TextField
                       id="outlined-basic"
@@ -290,44 +255,20 @@ export default function ModalTravelEdit({ data, open, close }) {
                   <div className={styles.arrival}>
                     <p>Llegada</p>
                     <div className={styles.form}>
-                      <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">
-                          Estado
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          defaultValue={data?.arrival?.state}
-                          label="Ciudad"
-                          disabled
-                        >
-                          {venezuela.map((item, index) => (
-                            <MenuItem value={item.estado} key={index}>
-                              {item.estado}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">
-                          Ciudad
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          defaultValue={data?.arrival?.city}
-                          label="Ciudad"
-                          disabled
-                        >
-                          {venezuela.map((item, index) =>
-                            data?.arrival?.state === item.estado
-                              ? item.ciudades.map((city, index) => (
-                                  <MenuItem value={city} key={index}>
-                                    {city}
-                                  </MenuItem>
-                                ))
-                              : ""
-                          )}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        id="outlined-basic"
+                        variant="outlined"
+                        label="Estado"
+                        defaultValue={data?.arrival?.state}
+                        disabled
+                      />
+                      <TextField
+                        id="outlined-basic"
+                        variant="outlined"
+                        label="Ciudad"
+                        defaultValue={data?.arrival?.city}
+                        disabled
+                      />
                     </div>
                     <TextField
                       id="outlined-basic"
@@ -370,24 +311,14 @@ export default function ModalTravelEdit({ data, open, close }) {
                     disabled
                     sx={{ width: 450 }}
                   />
-                  <FormControl sx={{ width: 250 }}>
-                    <InputLabel id="demo-simple-select-label">
-                      Tipo de transporte
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      defaultValue={data?.transport}
-                      label="Tipo de transporte"
-                      disabled
-                      // onChange={(e) => setTransport(e.target.value)}
-                    >
-                      {transportes.map((item, index) => (
-                        <MenuItem value={item} key={index}>
-                          {item}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    id="outlined-basic"
+                    label="Tipo de transporte"
+                    variant="outlined"
+                    value={data?.transport}
+                    disabled
+                    sx={{ width: 450 }}
+                  />
                   <div>
                     <div
                       style={{
@@ -401,7 +332,6 @@ export default function ModalTravelEdit({ data, open, close }) {
                         variant="outlined"
                         defaultValue={price ? price : data?.price}
                         disabled
-                        onChange={(e) => setPrice(e.target.value)}
                         sx={{ width: 200 }}
                       />
                       <TextField
@@ -409,8 +339,7 @@ export default function ModalTravelEdit({ data, open, close }) {
                         variant="outlined"
                         label="Cantidad de puestos disponibles"
                         disabled
-                        value={stockVerify ? stockVerify : stock}
-                        //   onChange={(e) => setQuantity(e.target.value)}
+                        defaultValue={stock ? stock : data?.stock}
                         sx={{ width: 200 }}
                       />
                     </div>
@@ -444,34 +373,49 @@ export default function ModalTravelEdit({ data, open, close }) {
                     }}
                   />
 
-                  <FormControl fullWidth style={{ marginLeft: "5px" }}>
-                    <InputLabel id="demo-multiple-checkbox-label">
-                      Caracteristicas del bus
-                    </InputLabel>
-                    <Select
-                      labelId="demo-multiple-checkbox-label"
-                      id="demo-multiple-checkbox"
-                      multiple
-                      value={selectCharts}
-                      onChange={handleChangeCharts}
-                      disabled={!edit}
+                  {edit ? (
+                    <FormControl fullWidth style={{ marginLeft: "5px" }}>
+                      <InputLabel id="demo-multiple-checkbox-label">
+                        Caracteristicas del bus
+                      </InputLabel>
+                      <Select
+                        labelId="demo-multiple-checkbox-label"
+                        id="demo-multiple-checkbox"
+                        multiple
+                        value={selectCharts}
+                        onChange={handleChangeCharts}
+                        disabled={!edit}
+                        defaultValue={data?.transportFeatures}
+                        input={
+                          <OutlinedInput label="Caracteristicas del bus" />
+                        }
+                        renderValue={(selected) =>
+                          selected.map((charts) => features[charts]).join(", ")
+                        }
+                        MenuProps={MenuProps}
+                      >
+                        {Object.keys(features).map((charts) => (
+                          <MenuItem key={charts} value={charts}>
+                            <Checkbox
+                              checked={selectCharts.indexOf(charts) > -1}
+                            />
+                            <ListItemText primary={features[charts]} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <TextField
+                      // id="outlined-basic"
+                      // label=""
+                      // variant="outlined"
+                      disabled
                       defaultValue={data?.transportFeatures}
-                      input={<OutlinedInput label="Caracteristicas del bus" />}
-                      renderValue={(selected) =>
-                        selected.map((charts) => features[charts]).join(", ")
-                      }
-                      MenuProps={MenuProps}
-                    >
-                      {Object.keys(features).map((charts) => (
-                        <MenuItem key={charts} value={charts}>
-                          {edit && <Checkbox
-                            checked={selectCharts.indexOf(charts) > -1}
-                          />}
-                          <ListItemText primary={features[charts]} />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      sx={{
+                        width: 500,
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -500,6 +444,7 @@ export default function ModalTravelEdit({ data, open, close }) {
                   onClick={() => {
                     close();
                     setPrice(data?.price);
+                    setStock(data?.stock);
                   }}
                 >
                   Salir

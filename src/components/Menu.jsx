@@ -183,7 +183,7 @@ const Menu = ({ ancho, dataResult }) => {
           </ListItemButton>
         </List>
 
-        <div>
+        {/* <div>
           {profileAuth?.rol === "owner" ? (
             <div className={styles.panel}>
               {imageAgency?.image && (
@@ -227,7 +227,7 @@ const Menu = ({ ancho, dataResult }) => {
               </div>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     )
   );
