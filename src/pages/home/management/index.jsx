@@ -73,36 +73,65 @@ const Management = () => {
     let totalTodo = 0;
     let agencyID = router.id;
     const officeID = businessId ? businessId : business;
+
     try {
-      console.log("averigaundo: ", {
-        business,
-        businessId,
-        ROUTER: router.offficeID,
-        dateInput,
-        search,
-      });
       if (dateInput && search && (business || businessId || router.offficeID)) {
         console.log("ENTRO EN LISTA");
         // preguntamos si es owner o employye
         let bookingtoPaid;
         if (router.type === "owner") {
-          const resultOwner = await API.graphql({
-            query: queries.listBookings,
-            authMode: "AMAZON_COGNITO_USER_POOLS",
-            variables: {
-              filter: {
-                and: [
-                  {
-                    agencyID: { eq: agencyID },
-                  },
-                  {
-                    officeID: { eq: officeID },
-                  },
-                ],
+          const fetchAllBookings = async (nextToken, result = []) => {
+            const response = await API.graphql({
+              query: queries.listBookings,
+              authMode: "AMAZON_COGNITO_USER_POOLS",
+              variables: {
+                filter: {
+                  and: [
+                    {
+                      agencyID: { eq: agencyID },
+                    },
+                    {
+                      officeID: { eq: officeID },
+                    },
+                  ],
+                },
+                nextToken,
               },
-            },
-          });
-          bookingtoPaid = resultOwner;
+            });
+
+            const items = response.data.listBookings.items;
+            result.push(...items);
+
+            if (response.data.listBookings.nextToken) {
+              return fetchAllBookings(
+                response.data.listBookings.nextToken,
+                result
+              );
+            }
+
+            return result;
+          };
+          const allBookingsOwner = await fetchAllBookings();
+
+          /* Lo que se quito */
+          // const resultOwner = await API.graphql({
+          //   query: queries.listBookings,
+          //   authMode: "AMAZON_COGNITO_USER_POOLS",
+          //   variables: {
+          //     filter: {
+          //       and: [
+          //         {
+          //           agencyID: { eq: agencyID },
+          //         },
+          //         {
+          //           officeID: { eq: officeID },
+          //         },
+          //       ],
+          //     },
+          //   },
+          // });
+
+          bookingtoPaid = allBookingsOwner;
         } else if (router.type === "employee") {
           const resultEmployee = await API.graphql({
             query: queries.getEmployee,
@@ -112,31 +141,67 @@ const Management = () => {
             },
           });
           agencyID = resultEmployee?.data?.getEmployee?.agencyID;
-          const resultOwner = await API.graphql({
-            query: queries.listBookings,
-            authMode: "AMAZON_COGNITO_USER_POOLS",
-            variables: {
-              filter: {
-                and: [
-                  {
-                    agencyID: {
-                      eq: resultEmployee?.data?.getEmployee?.agencyID,
+
+          const fetchAllBookingsEmployee = async (nextToken, result = []) => {
+            const response = await API.graphql({
+              query: queries.listBookings,
+              authMode: "AMAZON_COGNITO_USER_POOLS",
+              variables: {
+                filter: {
+                  and: [
+                    {
+                      agencyID: {
+                        eq: resultEmployee?.data?.getEmployee?.agencyID,
+                      },
                     },
-                  },
-                  {
-                    officeID: { eq: router.offficeID },
-                  },
-                ],
+                    {
+                      officeID: { eq: router.offficeID },
+                    },
+                  ],
+                },
+                nextToken,
               },
-            },
-          });
-          bookingtoPaid = resultOwner;
+            });
+
+            const items = response.data.listBookings.items;
+            result.push(...items);
+
+            if (response.data.listBookings.nextToken) {
+              return fetchAllBookingsEmployee(
+                response.data.listBookings.nextToken,
+                result
+              );
+            }
+
+            return result;
+          };
+          /* Lo que se quito */
+          // const resultOwner = await API.graphql({
+          //   query: queries.listBookings,
+          //   authMode: "AMAZON_COGNITO_USER_POOLS",
+          //   variables: {
+          //     filter: {
+          //       and: [
+          //         {
+          //           agencyID: {
+          //             eq: resultEmployee?.data?.getEmployee?.agencyID,
+          //           },
+          //         },
+          //         {
+          //           officeID: { eq: router.offficeID },
+          //         },
+          //       ],
+          //     },
+          //   },
+          // });
+          const allBookingsEmployee = await fetchAllBookingsEmployee();
+
+          bookingtoPaid = allBookingsEmployee;
         }
 
-        const listBookingDate =
-          bookingtoPaid?.data?.listBookings?.items?.filter(
-            (r) => r.departure.date === dateInput
-          );
+        const listBookingDate = bookingtoPaid?.filter(
+          (r) => r.departure.date === dateInput
+        );
         console.log("AQUI SE CARGO");
         // datos de oficina
         setData(listBookingDate[0]?.office);
@@ -213,29 +278,79 @@ const Management = () => {
         console.log("ENTRO EN GRAFICA");
         let result;
         if (router.type === "owner") {
-          const resultOwner = await API.graphql({
-            query: queries.listOffices,
-            authMode: "AMAZON_COGNITO_USER_POOLS",
-            variables: {
-              filter: {
-                agencyID: { eq: router.id },
+          const fetchOfficiesOwner = async (nextToken, result = []) => {
+            const response = await API.graphql({
+              query: queries.listOffices,
+              authMode: "AMAZON_COGNITO_USER_POOLS",
+              variables: {
+                filter: {
+                  agencyID: { eq: router.id },
+                },
+                nextToken,
               },
-            },
-          });
-          result = resultOwner;
+            });
+
+            const items = response.data.listOffices.items;
+            result.push(...items);
+
+            if (response.data.listOffices.nextToken) {
+              return fetchOfficiesOwner(
+                response.data.listOffices.nextToken,
+                result
+              );
+            }
+
+            return result;
+          };
+          const allOfficiesOwner = await fetchOfficiesOwner();
+          /* Lo que se quito */
+          // const resultOwner = await API.graphql({
+          //   query: queries.listOffices,
+          //   authMode: "AMAZON_COGNITO_USER_POOLS",
+          //   variables: {
+          //     filter: {
+          //       agencyID: { eq: router.id },
+          //     },
+          //   },
+          // });
+          result = allOfficiesOwner;
         }
         if (router.type === "employee") {
-          const resultEmployee = await API.graphql({
-            query: queries.listOffices,
-            authMode: "AMAZON_COGNITO_USER_POOLS",
-            variables: {
-              id: router.offficeID,
-            },
-          });
+          const fetchOfficiesEmployee = async (nextToken, result = []) => {
+            const response = await API.graphql({
+              query: queries.listOffices,
+              authMode: "AMAZON_COGNITO_USER_POOLS",
+              variables: {
+                id: router.offficeID,
+                nextToken,
+              },
+            });
 
-          result = resultEmployee;
+            const items = response.data.listOffices.items;
+            result.push(...items);
+
+            if (response.data.listOffices.nextToken) {
+              return fetchOfficiesOwner(
+                response.data.listOffices.nextToken,
+                result
+              );
+            }
+
+            return result;
+          };
+          const allOfficiesEmployee = await fetchOfficiesEmployee();
+          /* Lo que se quito */
+          // const resultEmployee = await API.graphql({
+          //   query: queries.listOffices,
+          //   authMode: "AMAZON_COGNITO_USER_POOLS",
+          //   variables: {
+          //     id: router.offficeID,
+          //   },
+          // });
+
+          result = allOfficiesEmployee;
         }
-        let filter = result.data.listOffices.items.filter(
+        let filter = result.filter(
           (item, index) => item.status === "ENABLED"
         );
         let array30Dias = [];

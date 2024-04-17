@@ -52,7 +52,6 @@ const Dashboard = ({ dataResult, userType }) => {
 
     setData(list?.data?.getEmployee);
 
-
     const fetchAllBookings = async (nextToken, result = []) => {
       const response = await API.graphql({
         query: queries.getBookingbyAgencyID,
@@ -67,14 +66,17 @@ const Dashboard = ({ dataResult, userType }) => {
       result.push(...items);
 
       if (response.data.getBookingbyAgencyID.nextToken) {
-        return fetchAllBookings(response.data.getBookingbyAgencyID.nextToken, result);
+        return fetchAllBookings(
+          response.data.getBookingbyAgencyID.nextToken,
+          result
+        );
       }
 
       return result;
     };
 
     const allBookings = await fetchAllBookings();
-    console.log(allBookings);
+    
     // let array = allBookings.sort(
     //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
     // );
@@ -97,16 +99,35 @@ const Dashboard = ({ dataResult, userType }) => {
   };
 
   const Travels = async () => {
-    const list = await API.graphql({
-      query: queries.listOrderDetails,
-      authMode: "AMAZON_COGNITO_USER_POOLS",
-      variables: {
-        filter: {
-          bookingID: { eq: travel },
+    const fetchAllOrders = async (nextToken, result = []) => {
+      const response = await API.graphql({
+        query: queries.listOrderDetails,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          filter: {
+            bookingID: { eq: travel },
+          },
+          nextToken,
         },
-      },
-    });
-    setDataOrders(list.data.listOrderDetails.items);
+      });
+      // return;
+
+      const items = response.data.listOrderDetails.items;
+      result.push(...items);
+
+      if (response.data.listOrderDetails.nextToken) {
+        return fetchAllOrders(
+          response.data.listOrderDetails.nextToken,
+          result
+        );
+      }
+
+      return result;
+    };
+    const allOrders = await fetchAllOrders();
+    console.log(allOrders);
+    setDataOrders(allOrders);
+
   };
 
   useEffect(() => {
