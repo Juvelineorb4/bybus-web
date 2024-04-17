@@ -9,13 +9,11 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { getTransport } from "../graphql/queries";
-import { updateTransport } from "../graphql/mutations";
+import { createPagoMivil } from "../graphql/mutations";
 const client = generateClient();
-export default function TransportUpdateForm(props) {
+export default function PagoMivilCreateForm(props) {
   const {
-    id: idProp,
-    transport: transportModelProp,
+    clearOnSuccess = true,
     onSuccess,
     onError,
     onSubmit,
@@ -25,48 +23,32 @@ export default function TransportUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    model: "",
-    serial: "",
-    type: "",
-    createdBy: "",
+    documento: "",
+    telefono: "",
+    codigoBanco: "",
+    nombreBanco: "",
   };
-  const [model, setModel] = React.useState(initialValues.model);
-  const [serial, setSerial] = React.useState(initialValues.serial);
-  const [type, setType] = React.useState(initialValues.type);
-  const [createdBy, setCreatedBy] = React.useState(initialValues.createdBy);
+  const [documento, setDocumento] = React.useState(initialValues.documento);
+  const [telefono, setTelefono] = React.useState(initialValues.telefono);
+  const [codigoBanco, setCodigoBanco] = React.useState(
+    initialValues.codigoBanco
+  );
+  const [nombreBanco, setNombreBanco] = React.useState(
+    initialValues.nombreBanco
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    const cleanValues = transportRecord
-      ? { ...initialValues, ...transportRecord }
-      : initialValues;
-    setModel(cleanValues.model);
-    setSerial(cleanValues.serial);
-    setType(cleanValues.type);
-    setCreatedBy(cleanValues.createdBy);
+    setDocumento(initialValues.documento);
+    setTelefono(initialValues.telefono);
+    setCodigoBanco(initialValues.codigoBanco);
+    setNombreBanco(initialValues.nombreBanco);
     setErrors({});
   };
-  const [transportRecord, setTransportRecord] =
-    React.useState(transportModelProp);
-  React.useEffect(() => {
-    const queryData = async () => {
-      const record = idProp
-        ? (
-            await client.graphql({
-              query: getTransport.replaceAll("__typename", ""),
-              variables: { id: idProp },
-            })
-          )?.data?.getTransport
-        : transportModelProp;
-      setTransportRecord(record);
-    };
-    queryData();
-  }, [idProp, transportModelProp]);
-  React.useEffect(resetStateValues, [transportRecord]);
   const validations = {
-    model: [],
-    serial: [],
-    type: [],
-    createdBy: [],
+    documento: [{ type: "Required" }],
+    telefono: [{ type: "Required" }],
+    codigoBanco: [{ type: "Required" }],
+    nombreBanco: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -94,10 +76,10 @@ export default function TransportUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          model: model ?? null,
-          serial: serial ?? null,
-          type: type ?? null,
-          createdBy: createdBy ?? null,
+          documento,
+          telefono,
+          codigoBanco,
+          nombreBanco,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -128,16 +110,18 @@ export default function TransportUpdateForm(props) {
             }
           });
           await client.graphql({
-            query: updateTransport.replaceAll("__typename", ""),
+            query: createPagoMivil.replaceAll("__typename", ""),
             variables: {
               input: {
-                id: transportRecord.id,
                 ...modelFields,
               },
             },
           });
           if (onSuccess) {
             onSuccess(modelFields);
+          }
+          if (clearOnSuccess) {
+            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -146,130 +130,129 @@ export default function TransportUpdateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "TransportUpdateForm")}
+      {...getOverrideProps(overrides, "PagoMivilCreateForm")}
       {...rest}
     >
       <TextField
-        label="Model"
-        isRequired={false}
+        label="Documento"
+        isRequired={true}
         isReadOnly={false}
-        value={model}
+        value={documento}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              model: value,
-              serial,
-              type,
-              createdBy,
+              documento: value,
+              telefono,
+              codigoBanco,
+              nombreBanco,
             };
             const result = onChange(modelFields);
-            value = result?.model ?? value;
+            value = result?.documento ?? value;
           }
-          if (errors.model?.hasError) {
-            runValidationTasks("model", value);
+          if (errors.documento?.hasError) {
+            runValidationTasks("documento", value);
           }
-          setModel(value);
+          setDocumento(value);
         }}
-        onBlur={() => runValidationTasks("model", model)}
-        errorMessage={errors.model?.errorMessage}
-        hasError={errors.model?.hasError}
-        {...getOverrideProps(overrides, "model")}
+        onBlur={() => runValidationTasks("documento", documento)}
+        errorMessage={errors.documento?.errorMessage}
+        hasError={errors.documento?.hasError}
+        {...getOverrideProps(overrides, "documento")}
       ></TextField>
       <TextField
-        label="Serial"
-        isRequired={false}
+        label="Telefono"
+        isRequired={true}
         isReadOnly={false}
-        value={serial}
+        value={telefono}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              model,
-              serial: value,
-              type,
-              createdBy,
+              documento,
+              telefono: value,
+              codigoBanco,
+              nombreBanco,
             };
             const result = onChange(modelFields);
-            value = result?.serial ?? value;
+            value = result?.telefono ?? value;
           }
-          if (errors.serial?.hasError) {
-            runValidationTasks("serial", value);
+          if (errors.telefono?.hasError) {
+            runValidationTasks("telefono", value);
           }
-          setSerial(value);
+          setTelefono(value);
         }}
-        onBlur={() => runValidationTasks("serial", serial)}
-        errorMessage={errors.serial?.errorMessage}
-        hasError={errors.serial?.hasError}
-        {...getOverrideProps(overrides, "serial")}
+        onBlur={() => runValidationTasks("telefono", telefono)}
+        errorMessage={errors.telefono?.errorMessage}
+        hasError={errors.telefono?.hasError}
+        {...getOverrideProps(overrides, "telefono")}
       ></TextField>
       <TextField
-        label="Type"
-        isRequired={false}
+        label="Codigo banco"
+        isRequired={true}
         isReadOnly={false}
-        value={type}
+        value={codigoBanco}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              model,
-              serial,
-              type: value,
-              createdBy,
+              documento,
+              telefono,
+              codigoBanco: value,
+              nombreBanco,
             };
             const result = onChange(modelFields);
-            value = result?.type ?? value;
+            value = result?.codigoBanco ?? value;
           }
-          if (errors.type?.hasError) {
-            runValidationTasks("type", value);
+          if (errors.codigoBanco?.hasError) {
+            runValidationTasks("codigoBanco", value);
           }
-          setType(value);
+          setCodigoBanco(value);
         }}
-        onBlur={() => runValidationTasks("type", type)}
-        errorMessage={errors.type?.errorMessage}
-        hasError={errors.type?.hasError}
-        {...getOverrideProps(overrides, "type")}
+        onBlur={() => runValidationTasks("codigoBanco", codigoBanco)}
+        errorMessage={errors.codigoBanco?.errorMessage}
+        hasError={errors.codigoBanco?.hasError}
+        {...getOverrideProps(overrides, "codigoBanco")}
       ></TextField>
       <TextField
-        label="Created by"
-        isRequired={false}
+        label="Nombre banco"
+        isRequired={true}
         isReadOnly={false}
-        value={createdBy}
+        value={nombreBanco}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              model,
-              serial,
-              type,
-              createdBy: value,
+              documento,
+              telefono,
+              codigoBanco,
+              nombreBanco: value,
             };
             const result = onChange(modelFields);
-            value = result?.createdBy ?? value;
+            value = result?.nombreBanco ?? value;
           }
-          if (errors.createdBy?.hasError) {
-            runValidationTasks("createdBy", value);
+          if (errors.nombreBanco?.hasError) {
+            runValidationTasks("nombreBanco", value);
           }
-          setCreatedBy(value);
+          setNombreBanco(value);
         }}
-        onBlur={() => runValidationTasks("createdBy", createdBy)}
-        errorMessage={errors.createdBy?.errorMessage}
-        hasError={errors.createdBy?.hasError}
-        {...getOverrideProps(overrides, "createdBy")}
+        onBlur={() => runValidationTasks("nombreBanco", nombreBanco)}
+        errorMessage={errors.nombreBanco?.errorMessage}
+        hasError={errors.nombreBanco?.hasError}
+        {...getOverrideProps(overrides, "nombreBanco")}
       ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Reset"
+          children="Clear"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          isDisabled={!(idProp || transportModelProp)}
-          {...getOverrideProps(overrides, "ResetButton")}
+          {...getOverrideProps(overrides, "ClearButton")}
         ></Button>
         <Flex
           gap="15px"
@@ -279,10 +262,7 @@ export default function TransportUpdateForm(props) {
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={
-              !(idProp || transportModelProp) ||
-              Object.values(errors).some((e) => e?.hasError)
-            }
+            isDisabled={Object.values(errors).some((e) => e?.hasError)}
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>

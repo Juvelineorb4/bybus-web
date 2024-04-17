@@ -19,10 +19,11 @@ import {
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { getOverrideProps } from "@aws-amplify/ui-react/internal";
-import { Booking } from "../models";
-import { fetchByPath, validateField } from "./utils";
-import { DataStore } from "aws-amplify";
+import { fetchByPath, getOverrideProps, validateField } from "./utils";
+import { generateClient } from "aws-amplify/api";
+import { getBooking } from "../graphql/queries";
+import { updateBooking } from "../graphql/mutations";
+const client = generateClient();
 function ArrayField({
   items = [],
   onChange,
@@ -35,6 +36,7 @@ function ArrayField({
   defaultFieldValue,
   lengthLimit,
   getBadgeText,
+  runValidationTasks,
   errorMessage,
 }) {
   const labelElement = <Text>{label}</Text>;
@@ -58,6 +60,7 @@ function ArrayField({
     setSelectedBadgeIndex(undefined);
   };
   const addItem = async () => {
+    const { hasError } = runValidationTasks();
     if (
       currentFieldValue !== undefined &&
       currentFieldValue !== null &&
@@ -167,12 +170,7 @@ function ArrayField({
               }}
             ></Button>
           )}
-          <Button
-            size="small"
-            variation="link"
-            isDisabled={hasError}
-            onClick={addItem}
-          >
+          <Button size="small" variation="link" onClick={addItem}>
             {selectedBadgeIndex !== undefined ? "Save" : "Add"}
           </Button>
         </Flex>
@@ -254,7 +252,12 @@ export default function BookingUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Booking, idProp)
+        ? (
+            await client.graphql({
+              query: getBooking.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getBooking
         : bookingModelProp;
       setBookingRecord(record);
     };
@@ -305,19 +308,19 @@ export default function BookingUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          status,
-          code,
-          departureCity,
-          arrivalCity,
-          stock,
-          price,
-          percentage,
-          createdBy,
-          driver,
-          transport,
-          transportParking,
-          transportFeatures,
-          owner,
+          status: status ?? null,
+          code: code ?? null,
+          departureCity: departureCity ?? null,
+          arrivalCity: arrivalCity ?? null,
+          stock: stock ?? null,
+          price: price ?? null,
+          percentage: percentage ?? null,
+          createdBy: createdBy ?? null,
+          driver: driver ?? null,
+          transport: transport ?? null,
+          transportParking: transportParking ?? null,
+          transportFeatures: transportFeatures ?? null,
+          owner: owner ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -343,21 +346,26 @@ export default function BookingUpdateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value.trim() === "") {
-              modelFields[key] = undefined;
+            if (typeof value === "string" && value === "") {
+              modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            Booking.copyOf(bookingRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateBooking.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: bookingRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
@@ -848,6 +856,12 @@ export default function BookingUpdateForm(props) {
         label={"Transport features"}
         items={transportFeatures}
         hasError={errors?.transportFeatures?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks(
+            "transportFeatures",
+            currentTransportFeaturesValue
+          )
+        }
         errorMessage={errors?.transportFeatures?.errorMessage}
         setFieldValue={setCurrentTransportFeaturesValue}
         inputFieldRef={transportFeaturesRef}

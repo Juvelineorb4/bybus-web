@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@mui/x-charts"],
   images: {
-    domains: ["s3storagebybus234733-prod.s3.amazonaws.com"],
+    domains: ["s3storagebybus193751-stage.s3.amazonaws.com"],
   },
 };
 
