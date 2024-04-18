@@ -9,11 +9,36 @@ import { Auth, API } from "aws-amplify";
 const Pays = () => {
   const [data, setData] = useState([]);
   const fetchOrders = async () => {
-    const result = await API.graphql({
-      query: queries.listOrderDetails,
-      authMode: "AMAZON_COGNITO_USER_POOLS",
-    });
-    let filter = result.data.listOrderDetails.items.filter(
+
+    const fetchAllOrders = async (nextToken, result = []) => {
+      const response = await API.graphql({
+        query: queries.listOrderDetails,
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+        variables: {
+          nextToken,
+        },
+      });
+
+      const items = response.data.listOrderDetails.items;
+      result.push(...items);
+
+      if (response.data.listOrderDetails.nextToken) {
+        return fetchAllOrders(
+          response.data.listOrderDetails.nextToken,
+          result
+        );
+      }
+
+      return result;
+    };
+
+    const result = await fetchAllOrders();
+    /* Lo que se quito */
+    // const result = await API.graphql({
+    //   query: queries.listOrderDetails,
+    //   authMode: "AMAZON_COGNITO_USER_POOLS",
+    // });
+    let filter = result.filter(
       (item) => item.status === "PENDIENTE"
     );
     setData(filter);

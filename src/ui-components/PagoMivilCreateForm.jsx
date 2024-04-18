@@ -8,10 +8,10 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { getOverrideProps } from "@aws-amplify/ui-react/internal";
-import { AgencyHistory } from "../models";
+import { PagoMivil } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
-export default function AgencyHistoryCreateForm(props) {
+export default function PagoMivilCreateForm(props) {
   const {
     clearOnSuccess = true,
     onSuccess,
@@ -23,22 +23,32 @@ export default function AgencyHistoryCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    reason: "",
-    description: "",
+    documento: "",
+    telefono: "",
+    codigoBanco: "",
+    nombreBanco: "",
   };
-  const [reason, setReason] = React.useState(initialValues.reason);
-  const [description, setDescription] = React.useState(
-    initialValues.description
+  const [documento, setDocumento] = React.useState(initialValues.documento);
+  const [telefono, setTelefono] = React.useState(initialValues.telefono);
+  const [codigoBanco, setCodigoBanco] = React.useState(
+    initialValues.codigoBanco
+  );
+  const [nombreBanco, setNombreBanco] = React.useState(
+    initialValues.nombreBanco
   );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setReason(initialValues.reason);
-    setDescription(initialValues.description);
+    setDocumento(initialValues.documento);
+    setTelefono(initialValues.telefono);
+    setCodigoBanco(initialValues.codigoBanco);
+    setNombreBanco(initialValues.nombreBanco);
     setErrors({});
   };
   const validations = {
-    reason: [],
-    description: [],
+    documento: [{ type: "Required" }],
+    telefono: [{ type: "Required" }],
+    codigoBanco: [{ type: "Required" }],
+    nombreBanco: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -66,8 +76,10 @@ export default function AgencyHistoryCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          reason,
-          description,
+          documento,
+          telefono,
+          codigoBanco,
+          nombreBanco,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -97,7 +109,7 @@ export default function AgencyHistoryCreateForm(props) {
               modelFields[key] = undefined;
             }
           });
-          await DataStore.save(new AgencyHistory(modelFields));
+          await DataStore.save(new PagoMivil(modelFields));
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -110,58 +122,116 @@ export default function AgencyHistoryCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "AgencyHistoryCreateForm")}
+      {...getOverrideProps(overrides, "PagoMivilCreateForm")}
       {...rest}
     >
       <TextField
-        label="Reason"
-        isRequired={false}
+        label="Documento"
+        isRequired={true}
         isReadOnly={false}
-        value={reason}
+        value={documento}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              reason: value,
-              description,
+              documento: value,
+              telefono,
+              codigoBanco,
+              nombreBanco,
             };
             const result = onChange(modelFields);
-            value = result?.reason ?? value;
+            value = result?.documento ?? value;
           }
-          if (errors.reason?.hasError) {
-            runValidationTasks("reason", value);
+          if (errors.documento?.hasError) {
+            runValidationTasks("documento", value);
           }
-          setReason(value);
+          setDocumento(value);
         }}
-        onBlur={() => runValidationTasks("reason", reason)}
-        errorMessage={errors.reason?.errorMessage}
-        hasError={errors.reason?.hasError}
-        {...getOverrideProps(overrides, "reason")}
+        onBlur={() => runValidationTasks("documento", documento)}
+        errorMessage={errors.documento?.errorMessage}
+        hasError={errors.documento?.hasError}
+        {...getOverrideProps(overrides, "documento")}
       ></TextField>
       <TextField
-        label="Description"
-        isRequired={false}
+        label="Telefono"
+        isRequired={true}
         isReadOnly={false}
-        value={description}
+        value={telefono}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              reason,
-              description: value,
+              documento,
+              telefono: value,
+              codigoBanco,
+              nombreBanco,
             };
             const result = onChange(modelFields);
-            value = result?.description ?? value;
+            value = result?.telefono ?? value;
           }
-          if (errors.description?.hasError) {
-            runValidationTasks("description", value);
+          if (errors.telefono?.hasError) {
+            runValidationTasks("telefono", value);
           }
-          setDescription(value);
+          setTelefono(value);
         }}
-        onBlur={() => runValidationTasks("description", description)}
-        errorMessage={errors.description?.errorMessage}
-        hasError={errors.description?.hasError}
-        {...getOverrideProps(overrides, "description")}
+        onBlur={() => runValidationTasks("telefono", telefono)}
+        errorMessage={errors.telefono?.errorMessage}
+        hasError={errors.telefono?.hasError}
+        {...getOverrideProps(overrides, "telefono")}
+      ></TextField>
+      <TextField
+        label="Codigo banco"
+        isRequired={true}
+        isReadOnly={false}
+        value={codigoBanco}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              documento,
+              telefono,
+              codigoBanco: value,
+              nombreBanco,
+            };
+            const result = onChange(modelFields);
+            value = result?.codigoBanco ?? value;
+          }
+          if (errors.codigoBanco?.hasError) {
+            runValidationTasks("codigoBanco", value);
+          }
+          setCodigoBanco(value);
+        }}
+        onBlur={() => runValidationTasks("codigoBanco", codigoBanco)}
+        errorMessage={errors.codigoBanco?.errorMessage}
+        hasError={errors.codigoBanco?.hasError}
+        {...getOverrideProps(overrides, "codigoBanco")}
+      ></TextField>
+      <TextField
+        label="Nombre banco"
+        isRequired={true}
+        isReadOnly={false}
+        value={nombreBanco}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              documento,
+              telefono,
+              codigoBanco,
+              nombreBanco: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.nombreBanco ?? value;
+          }
+          if (errors.nombreBanco?.hasError) {
+            runValidationTasks("nombreBanco", value);
+          }
+          setNombreBanco(value);
+        }}
+        onBlur={() => runValidationTasks("nombreBanco", nombreBanco)}
+        errorMessage={errors.nombreBanco?.errorMessage}
+        hasError={errors.nombreBanco?.hasError}
+        {...getOverrideProps(overrides, "nombreBanco")}
       ></TextField>
       <Flex
         justifyContent="space-between"

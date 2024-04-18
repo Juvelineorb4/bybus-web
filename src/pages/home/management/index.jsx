@@ -68,26 +68,62 @@ const Management = () => {
     try {
       // buscamos los viajes ya partidos o llegados de las agencias
       if (business || businessId) {
-        const bookingtoPaid = await API.graphql({
-          query: queries.listBookings,
-          authMode: "AMAZON_COGNITO_USER_POOLS",
-          variables: {
-            filter: {
-              and: [
-                { agencyID: { eq: businessId ? businessId : business } },
-                {
-                  or: [
-                    { status: { eq: "ARRIVED" } },
-                    { status: { eq: "DEPARTED" } },
-                  ],
-                },
-              ],
+
+        const fetchAllBookings = async (nextToken, result = []) => {
+          const response = await API.graphql({
+            query: queries.listBookings,
+            authMode: "AMAZON_COGNITO_USER_POOLS",
+            variables: {
+              filter: {
+                and: [
+                  { agencyID: { eq: businessId ? businessId : business } },
+                  {
+                    or: [
+                      { status: { eq: "ARRIVED" } },
+                      { status: { eq: "DEPARTED" } },
+                    ],
+                  },
+                ],
+              },
+              nextToken,
             },
-          },
-        });
+          });
+    
+          const items = response.data.listBookings.items;
+          result.push(...items);
+    
+          if (response.data.listBookings.nextToken) {
+            return fetchAllBookings(
+              response.data.listBookings.nextToken,
+              result
+            );
+          }
+    
+          return result;
+        };
+    
+        const bookingtoPaid = await fetchAllBookings();
+        /* Lo que se quito */
+        // const bookingtoPaid = await API.graphql({
+        //   query: queries.listBookings,
+        //   authMode: "AMAZON_COGNITO_USER_POOLS",
+        //   variables: {
+        //     filter: {
+        //       and: [
+        //         { agencyID: { eq: businessId ? businessId : business } },
+        //         {
+        //           or: [
+        //             { status: { eq: "ARRIVED" } },
+        //             { status: { eq: "DEPARTED" } },
+        //           ],
+        //         },
+        //       ],
+        //     },
+        //   },
+        // });
         // lista de viajes de la fecha
         const listBookingDate =
-          bookingtoPaid?.data?.listBookings?.items?.filter(
+          bookingtoPaid?.filter(
             (r) => r.departure.date === dateInput
           );
         //console.log("DATA: ", listBookingDate[0]?.agency);
@@ -143,6 +179,7 @@ const Management = () => {
         setTotalAll(totalTodo);
         // aqui se termina de mostrar lo de resumen de deuda.
         // busquemos si ya la deuda fue pagada en history
+        
         const historyReason = await API.graphql({
           query: queries.listAgencyHistories,
           authMode: "AMAZON_COGNITO_USER_POOLS",
@@ -169,14 +206,38 @@ const Management = () => {
       } else {
         // aqui comenzamos cuando no colocan id en business
         // buscamos todas las agencias
-        const result = await API.graphql({
-          query: queries.listAgencies,
-          authMode: "AMAZON_COGNITO_USER_POOLS",
-          // variables: {
-          // },
-        });
+        const fetchAllAgencies = async (nextToken, result = []) => {
+          const response = await API.graphql({
+            query: queries.listAgencies,
+            authMode: "AMAZON_COGNITO_USER_POOLS",
+            variables: {
+              nextToken,
+            },
+          });
+    
+          const items = response.data.listAgencies.items;
+          result.push(...items);
+    
+          if (response.data.listAgencies.nextToken) {
+            return fetchAllAgencies(
+              response.data.listAgencies.nextToken,
+              result
+            );
+          }
+    
+          return result;
+        };
+    
+        const result = await fetchAllAgencies();
+        /* Lo que se quito */
+        // const result = await API.graphql({
+        //   query: queries.listAgencies,
+        //   authMode: "AMAZON_COGNITO_USER_POOLS",
+        //   // variables: {
+        //   // },
+        // });
         // la filtramos por ativo
-        let filter = result.data.listAgencies.items.filter(
+        let filter = result?.filter(
           (item, index) => item.status === "ACTIVO"
         );
         // arreglos para los datos segun el filtro de estadisticas

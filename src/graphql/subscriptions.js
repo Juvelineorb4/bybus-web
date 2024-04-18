@@ -1,6 +1,51 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const onCreatePagoMivil = /* GraphQL */ `
+  subscription OnCreatePagoMivil(
+    $filter: ModelSubscriptionPagoMivilFilterInput
+  ) {
+    onCreatePagoMivil(filter: $filter) {
+      id
+      documento
+      telefono
+      codigoBanco
+      nombreBanco
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdatePagoMivil = /* GraphQL */ `
+  subscription OnUpdatePagoMivil(
+    $filter: ModelSubscriptionPagoMivilFilterInput
+  ) {
+    onUpdatePagoMivil(filter: $filter) {
+      id
+      documento
+      telefono
+      codigoBanco
+      nombreBanco
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeletePagoMivil = /* GraphQL */ `
+  subscription OnDeletePagoMivil(
+    $filter: ModelSubscriptionPagoMivilFilterInput
+  ) {
+    onDeletePagoMivil(filter: $filter) {
+      id
+      documento
+      telefono
+      codigoBanco
+      nombreBanco
+      createdAt
+      updatedAt
+    }
+  }
+`;
 export const onCreateTasaCambio = /* GraphQL */ `
   subscription OnCreateTasaCambio(
     $filter: ModelSubscriptionTasaCambioFilterInput

@@ -6,6 +6,39 @@ export const getTodayTasaCambio = /* GraphQL */ `
     getTodayTasaCambio
   }
 `;
+export const getPagoMivil = /* GraphQL */ `
+  query GetPagoMivil($id: ID!) {
+    getPagoMivil(id: $id) {
+      id
+      documento
+      telefono
+      codigoBanco
+      nombreBanco
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listPagoMivils = /* GraphQL */ `
+  query ListPagoMivils(
+    $filter: ModelPagoMivilFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listPagoMivils(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        documento
+        telefono
+        codigoBanco
+        nombreBanco
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
 export const getTasaCambio = /* GraphQL */ `
   query GetTasaCambio($id: ID!) {
     getTasaCambio(id: $id) {
@@ -1399,15 +1432,15 @@ export const getBookingbyCode = /* GraphQL */ `
     }
   }
 `;
-export const bookingsByAgencyID = /* GraphQL */ `
-  query BookingsByAgencyID(
+export const getBookingbyAgencyID = /* GraphQL */ `
+  query GetBookingbyAgencyID(
     $agencyID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelBookingFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    bookingsByAgencyID(
+    getBookingbyAgencyID(
       agencyID: $agencyID
       sortDirection: $sortDirection
       filter: $filter
@@ -1491,15 +1524,15 @@ export const bookingsByAgencyID = /* GraphQL */ `
     }
   }
 `;
-export const bookingsByOfficeID = /* GraphQL */ `
-  query BookingsByOfficeID(
+export const listBookingbyOfficeID = /* GraphQL */ `
+  query ListBookingbyOfficeID(
     $officeID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelBookingFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    bookingsByOfficeID(
+    listBookingbyOfficeID(
       officeID: $officeID
       sortDirection: $sortDirection
       filter: $filter

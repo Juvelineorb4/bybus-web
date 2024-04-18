@@ -14,6 +14,7 @@ import {
   listEmailSusbcriptions,
   listAgencySubscriptions,
   listAgencies,
+  getBookingbyAgencyID,
 } from "@/graphql/queries";
 import * as queries from "@/graphql/custom/queries";
 import {
@@ -43,16 +44,59 @@ const Dashboard = () => {
 
   const fetchAgencySubs = async () => {
     try {
-      const result = await API.graphql({
-        query: listAgencySubscriptions,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      });
-      const list = await API.graphql({
-        query: queries.listAgencies,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      });
-      setAgencySubs(result?.data?.listAgencySubscriptions?.items);
-      setAgenciesList(list?.data?.listAgencies?.items);
+      const fetchAllAgenciesSubs = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: listAgencySubscriptions,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            nextToken,
+          },
+        });
+
+        const items = response.data.listAgencySubscriptions.items;
+        result.push(...items);
+
+        if (response.data.listAgencySubscriptions.nextToken) {
+          return fetchAllAgenciesSubs(
+            response.data.listAgencySubscriptions.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+      const fetchAllAgencies = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: queries.listAgencies,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            nextToken,
+          },
+        });
+
+        const items = response.data.listAgencies.items;
+        result.push(...items);
+
+        if (response.data.listAgencies.nextToken) {
+          return fetchAllAgencies(response.data.listAgencies.nextToken, result);
+        }
+
+        return result;
+      };
+
+      const result = await fetchAllAgenciesSubs();
+      const list = await fetchAllAgencies();
+      /* Lo que se quito */
+      // const result = await API.graphql({
+      //   query: listAgencySubscriptions,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      // });
+      // const list = await API.graphql({
+      //   query: queries.listAgencies,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      // });
+      setAgencySubs(result);
+      setAgenciesList(list);
     } catch (error) {
       setAgencySubs([]);
       console.error("ERROR AL CONSULTAR AGENCIAS SUBS: ", error);
@@ -62,19 +106,41 @@ const Dashboard = () => {
   /*  */
   const fetchAgency = async () => {
     try {
-      const result = await API.graphql({
-        query: queries.getAgency,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-        variables: {
-          id: agency,
-        },
-      });
-      let aprobados = result?.data?.getAgency?.bookings?.items.filter(
-        (obj) => obj.status === "AVAILABLE"
-      );
-      let cancelados = result?.data?.getAgency?.bookings?.items.filter(
-        (obj) => obj.status !== "AVAILABLE"
-      );
+      const fetchAllBookings = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: getBookingbyAgencyID,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            agencyID: agency,
+            nextToken,
+          },
+        });
+
+        const items = response.data.getBookingbyAgencyID.items;
+        result.push(...items);
+
+        if (response.data.getBookingbyAgencyID.nextToken) {
+          return fetchAllBookings(
+            response.data.getBookingbyAgencyID.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+
+      const result = await fetchAllBookings();
+      /* Lo que se quito */
+      // const result = await API.graphql({
+      //   query: queries.getAgency,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      //   variables: {
+      //     id: agency,
+      //   },
+      // });
+
+      let aprobados = result?.filter((obj) => obj.status === "AVAILABLE");
+      let cancelados = result?.filter((obj) => obj.status !== "AVAILABLE");
       aprobados.sort(
         (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
       );
@@ -84,17 +150,44 @@ const Dashboard = () => {
       let resultado = [...aprobados, ...cancelados];
       setAgencyBookings(resultado);
 
-      const orders = await API.graphql({
-        query: queries.listOrderDetails,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-        variables: {
-          filter: {
-            bookingID: { eq: travel },
+      const fetchAllOrders = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: queries.listOrderDetails,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            filter: {
+              bookingID: { eq: travel },
+            },
+            nextToken,
           },
-        },
-      });
+        });
+
+        const items = response.data.listOrderDetails.items;
+        result.push(...items);
+
+        if (response.data.listOrderDetails.nextToken) {
+          return fetchAllOrders(
+            response.data.listOrderDetails.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+
+      const orders = await fetchAllOrders();
+      /* Lo que se quito */
+      // const orders = await API.graphql({
+      //   query: queries.listOrderDetails,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      //   variables: {
+      //     filter: {
+      //       bookingID: { eq: travel },
+      //     },
+      //   },
+      // });
       // console.log("ORDERS", orders.data.listOrderDetails);
-      setAgencyOrders(orders?.data?.listOrderDetails?.items);
+      setAgencyOrders(orders);
     } catch (error) {
       console.log(error);
     }
@@ -104,19 +197,68 @@ const Dashboard = () => {
   };
   const fetchCSV = async () => {
     try {
-      const result = await API.graphql({
-        query: queries.listAgenciesCSV,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      });
+      const fetchAllAgenciesCSV = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: queries.listAgenciesCSV,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            nextToken,
+          },
+        });
+
+        const items = response.data.listAgencies.items;
+        result.push(...items);
+
+        if (response.data.listAgencies.nextToken) {
+          return fetchAllAgenciesCSV(
+            response.data.listAgencies.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+
+      const result = await fetchAllAgenciesCSV();
+      /* Lo que se quito */
+      // const result = await API.graphql({
+      //   query: queries.listAgenciesCSV,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      // });
       // console.log("LISTA", result?.data?.listAgencies);
-      const orders = await API.graphql({
-        query: queries.listOrdersCSV,
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      });
+
+      const fetchAllOrdersCSV = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: queries.listOrdersCSV,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            nextToken,
+          },
+        });
+
+        const items = response.data.listOrderDetails.items;
+        result.push(...items);
+
+        if (response.data.listOrderDetails.nextToken) {
+          return fetchAllOrdersCSV(
+            response.data.listOrderDetails.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+
+      const orders = await fetchAllOrdersCSV();
+      /* Lo que se quito */
+      // const orders = await API.graphql({
+      //   query: queries.listOrdersCSV,
+      //   authMode: "AMAZON_COGNITO_USER_POOLS",
+      // });
       // console.log("ORDERS", orders?.data?.listOrderDetails);
       setListCSV({
-        listAgencies: result?.data?.listAgencies?.items,
-        listOrdersDetails: orders?.data?.listOrderDetails?.items,
+        listAgencies: result,
+        listOrdersDetails: orders,
       });
     } catch (error) {
       console.log("aqui csv", error);
@@ -223,7 +365,6 @@ const Dashboard = () => {
         );
       }
     });
-
 
     listAgencies = listAgencies.map((item, index) => {
       return {
@@ -510,9 +651,13 @@ const Dashboard = () => {
           </div>
           <div className={styles.users}>
             <div className={styles.title}>
-              <h2 style={{
-                fontWeight: 700
-              }}>Listado de empresas suscritas</h2>
+              <h2
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                Listado de empresas suscritas
+              </h2>
               <IconButton
                 aria-label="refresh-email"
                 onClick={() => fetchAgencySubs()}
@@ -524,9 +669,13 @@ const Dashboard = () => {
           </div>
           <div className={styles.users}>
             <div className={styles.title}>
-              <h2 style={{
-                fontWeight: 700
-              }}>Listado de Peticion de Subscripcion de Agencias</h2>
+              <h2
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                Listado de Peticion de Subscripcion de Agencias
+              </h2>
               <IconButton
                 aria-label="refresh-agency"
                 onClick={() => fetchAgencySubs()}
@@ -540,9 +689,13 @@ const Dashboard = () => {
           {/*  */}
           <div className={styles.agencies}>
             <div className={styles.title}>
-              <h2 style={{
-                fontWeight: 700
-              }}>Lista de Viajes por Empresa</h2>
+              <h2
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                Lista de Viajes por Empresa
+              </h2>
             </div>
             <FormControl fullWidth>
               <Autocomplete
@@ -569,18 +722,20 @@ const Dashboard = () => {
               />
             </FormControl>
             {agencyBookings.length !== 0 ? (
-              <TableTravels
-                rows={agencyBookings}
-              />
+              <TableTravels rows={agencyBookings} />
             ) : (
               <div className={styles.nothingTable}>
                 Selecciona una empresa para poder ver sus viajes
               </div>
             )}
             <div className={styles.title}>
-              <h2 style={{
-                fontWeight: 700
-              }}>Lista de Ordenes de Venta por Viajes</h2>
+              <h2
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                Lista de Ordenes de Venta por Viajes
+              </h2>
             </div>
             <FormControl fullWidth>
               <Autocomplete
