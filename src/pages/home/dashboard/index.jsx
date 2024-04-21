@@ -25,11 +25,12 @@ import {
   MenuItem,
   Select,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import TableOrderDetails from "@/components/TableOrderDetails";
 import TableTravels from "@/components/TableTravels";
 import ModalAgency from "@/components/ModalAgency";
-
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Dashboard = () => {
   const [agencySubs, setAgencySubs] = useState([]);
   const [agencyBookings, setAgencyBookings] = useState([]);
@@ -41,6 +42,7 @@ const Dashboard = () => {
   const [travel, setTravel] = useState(null);
   const [listTravels, setListTravels] = useState([]);
   const [open, setOpen] = useState(false);
+  const [loadingTraverls, setLoadingTravels] = useState(false);
 
   const fetchAgencySubs = async () => {
     try {
@@ -105,6 +107,8 @@ const Dashboard = () => {
 
   /*  */
   const fetchAgency = async () => {
+    console.log("EJELEEEEEEEEEEEE");
+
     try {
       const fetchAllBookings = async (nextToken, result = []) => {
         const response = await API.graphql({
@@ -119,6 +123,16 @@ const Dashboard = () => {
         const items = response.data.getBookingbyAgencyID.items;
         result.push(...items);
 
+        let aprobados = result?.filter((obj) => obj.status === "AVAILABLE");
+        let cancelados = result?.filter((obj) => obj.status !== "AVAILABLE");
+        aprobados.sort(
+          (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+        );
+        cancelados.sort(
+          (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+        );
+        let resultado = [...aprobados, ...cancelados];
+        setAgencyBookings(resultado);
         if (response.data.getBookingbyAgencyID.nextToken) {
           return fetchAllBookings(
             response.data.getBookingbyAgencyID.nextToken,
@@ -128,28 +142,9 @@ const Dashboard = () => {
 
         return result;
       };
-
-      const result = await fetchAllBookings();
-      /* Lo que se quito */
-      // const result = await API.graphql({
-      //   query: queries.getAgency,
-      //   authMode: "AMAZON_COGNITO_USER_POOLS",
-      //   variables: {
-      //     id: agency,
-      //   },
-      // });
-
-      let aprobados = result?.filter((obj) => obj.status === "AVAILABLE");
-      let cancelados = result?.filter((obj) => obj.status !== "AVAILABLE");
-      aprobados.sort(
-        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-      );
-      cancelados.sort(
-        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-      );
-      let resultado = [...aprobados, ...cancelados];
-      setAgencyBookings(resultado);
-
+      setLoadingTravels(true);
+      await fetchAllBookings();
+      setLoadingTravels(false);
       const fetchAllOrders = async (nextToken, result = []) => {
         const response = await API.graphql({
           query: queries.listOrderDetails,
@@ -622,8 +617,9 @@ const Dashboard = () => {
   };
   useEffect(() => {
     fetchAgencySubs();
-    fetchAgency();
+    if (agency) fetchAgency();
     fetchCSV();
+    console.log("AGENCY: ", agency);
     // console.log(listCSV);
   }, [agency, travel]);
 
@@ -697,30 +693,93 @@ const Dashboard = () => {
                 Lista de Viajes por Empresa
               </h2>
             </div>
-            <FormControl fullWidth>
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                // getOptionLabel={(option) => option.rif}
-                isOptionEqualToValue={(option, value) =>
-                  option.rif === value.rif
-                }
-                options={agenciesList}
-                value={agency}
-                renderOption={(props, option) => (
-                  <Box component="li" {...props}>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                marginBottom: 10,
+              }}
+            >
+              <FormControl
+                sx={{
+                  width: 600,
+                }}
+                disabled={loadingTraverls}
+              >
+                <Autocomplete
+                  disablePortal
+                  disabled={loadingTraverls}
+                  id="combo-box-demo"
+                  // getOptionLabel={(option) => option.rif}
+                  isOptionEqualToValue={(option, value) =>
+                    option.rif === value.rif
+                  }
+                  options={agenciesList}
+                  value={agency}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props}>
+                      <div
+                        onClick={() => {
+                          setAgency(option.id);
+                        }}
+                      >{`Nombre: ${option.name} - RIF: ${option.rif}`}</div>
+                    </Box>
+                  )}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Busqueda por agencia" />
+                  )}
+                />
+              </FormControl>
+              <div
+                style={{
+                  display: "flex",
+
+                  width: 400,
+                  justifyContent: "start",
+                  alignItems: "center",
+                }}
+              >
+                {loadingTraverls ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      paddingLeft: 20,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <CircularProgress />
+                    </div>
+                    <div style={{ paddingLeft: 10 }}>
+                      <p>Buscando Viajes ...</p>
+                    </div>
+                  </div>
+                ) : (
+                  agencyBookings?.length > 0 && (
                     <div
-                      onClick={() => {
-                        setAgency(option.id);
+                      style={{
+                        display: "flex",
+                        paddingLeft: 20,
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
-                    >{`Nombre: ${option.name} - RIF: ${option.rif}`}</div>
-                  </Box>
+                    >
+                      <div>
+                        <CheckCircleIcon sx={{ color: "green" }} />
+                      </div>
+                      <div style={{ paddingLeft: 10 }}>
+                        <p>Viajes encontrados</p>
+                      </div>
+                    </div>
+                  )
                 )}
-                renderInput={(params) => (
-                  <TextField {...params} label="Busqueda por agencia" />
-                )}
-              />
-            </FormControl>
+              </div>
+            </div>
+
             {agencyBookings.length !== 0 ? (
               <TableTravels rows={agencyBookings} />
             ) : (

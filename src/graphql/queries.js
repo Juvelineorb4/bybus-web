@@ -1464,7 +1464,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
           phone
           percentage
           status
-          owner
+
           createdAt
           updatedAt
         }
@@ -1479,7 +1479,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
           email
           phone
           status
-          owner
+
           createdAt
           updatedAt
         }
@@ -1487,6 +1487,9 @@ export const getBookingbyAgencyID = /* GraphQL */ `
           nextToken
         }
         tickets {
+          items {
+            id
+          }
           nextToken
         }
         stops {
@@ -1516,7 +1519,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
         transport
         transportParking
         transportFeatures
-        owner
+
         createdAt
         updatedAt
       }

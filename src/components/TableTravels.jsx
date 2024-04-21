@@ -7,10 +7,10 @@ import { useState } from "react";
 import { Auth, API, graphqlOperation } from "aws-amplify";
 import * as mutation from "@/graphql/custom/mutations";
 
-const TableTravels = ({ rows  }) => {
+const TableTravels = ({ rows }) => {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
-  const filteredData = rows.filter(item => item.status !== 'CANCELLED');
+  const filteredData = rows.filter((item) => item.status !== "CANCELLED");
   const DeleteBooking = async (bookingId) => {
     const booking = await API.graphql({
       query: mutation.updateBooking,
@@ -18,13 +18,13 @@ const TableTravels = ({ rows  }) => {
       variables: {
         input: {
           id: bookingId,
-          status: 'CANCELLED'
-        }
+          status: "CANCELLED",
+        },
       },
     });
     console.log(booking.data.updateBooking);
   };
-  console.log('aqui', filteredData)
+  console.log("aqui", filteredData);
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
@@ -60,7 +60,13 @@ const TableTravels = ({ rows  }) => {
       renderCell: (params) => {
         return (
           <div>
-            {params.row.status === "AVAILABLE" ? 'DISPONIBLE' : params.row.status === "BOARDING" ? 'ABORDANDO' : params.row.status === "ARRIVED" ? 'FINALIZO' : 'CANCELADO'}
+            {params.row.status === "AVAILABLE"
+              ? "DISPONIBLE"
+              : params.row.status === "BOARDING"
+              ? "ABORDANDO"
+              : params.row.status === "ARRIVED"
+              ? "FINALIZO"
+              : "CANCELADO"}
           </div>
         );
       },
@@ -71,11 +77,7 @@ const TableTravels = ({ rows  }) => {
       width: 135,
       editable: true,
       renderCell: (params) => {
-        return (
-          <div>
-            {`${params.row.stock} tickets`}
-          </div>
-        );
+        return <div>{`${params.row.stock} tickets`}</div>;
       },
     },
     {
@@ -84,11 +86,7 @@ const TableTravels = ({ rows  }) => {
       width: 135,
       editable: true,
       renderCell: (params) => {
-        return (
-          <div>
-            {`${params.row?.tickets?.items?.length} tickets`}
-          </div>
-        );
+        return <div>{`${params.row?.tickets?.items?.length} tickets`}</div>;
       },
     },
     {
@@ -105,7 +103,7 @@ const TableTravels = ({ rows  }) => {
                 setOpen(!open);
               }}
               style={{
-                padding: 5
+                padding: 5,
               }}
             >{`Ver`}</button>
           </Stack>
@@ -115,7 +113,7 @@ const TableTravels = ({ rows  }) => {
   ];
 
   return (
-    <Box sx={{ height: 500, width: '100%' }}>
+    <Box sx={{ height: 500, width: "100%" }}>
       <DataGrid
         rows={filteredData ? filteredData : ""}
         columns={columns}
@@ -126,7 +124,7 @@ const TableTravels = ({ rows  }) => {
             },
           },
         }}
-        density='compact'
+        density="compact"
         pageSizeOptions={[10]}
         checkboxSelection
         localeText={esES.components.MuiDataGrid.defaultProps.localeText}
