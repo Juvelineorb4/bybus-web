@@ -8,6 +8,7 @@ export const getAgency = /* GraphQL */ `
       rif
       email
       phone
+      percentage
       createdAt
       updatedAt
       __typename
@@ -406,7 +407,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
           bookings {
             nextToken
           }
-          owner
+
           createdAt
           updatedAt
         }
@@ -430,7 +431,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
           bookings {
             nextToken
           }
-          owner
+
           createdAt
           updatedAt
         }
@@ -442,7 +443,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
             email
             bookingID
             ticketID
-            owner
+
             createdAt
             updatedAt
           }
@@ -460,7 +461,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
             status
             description
             url
-            owner
+
             createdAt
             updatedAt
             stopBookingTicketsId
@@ -503,7 +504,7 @@ export const getBookingbyAgencyID = /* GraphQL */ `
         transport
         transportParking
         transportFeatures
-        owner
+
         createdAt
         updatedAt
       }
@@ -592,7 +593,7 @@ export const listBookingbyOfficeID = /* GraphQL */ `
             email
             bookingID
             ticketID
-            owner
+            
             createdAt
             updatedAt
           }
@@ -610,7 +611,7 @@ export const listBookingbyOfficeID = /* GraphQL */ `
             status
             description
             url
-            owner
+           
             createdAt
             updatedAt
             stopBookingTicketsId
@@ -653,11 +654,119 @@ export const listBookingbyOfficeID = /* GraphQL */ `
         transport
         transportParking
         transportFeatures
-        owner
+      
         createdAt
         updatedAt
       }
       nextToken
+    }
+  }
+`;
+
+export const listAgencies = /* GraphQL */ `
+  query ListAgencies(
+    $filter: ModelAgencyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listAgencies(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        cognitoID
+        identityID
+        image
+        pin
+        name
+        rif
+        email
+        phone
+        percentage
+        status
+        history {
+          items {
+            id
+            agencyID
+            reason
+            description
+            createdAt
+            updatedAt
+          
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        officies {
+          items {
+            id
+            agencyID
+            name
+            state
+            city
+            address
+            email
+            phone
+            status
+          
+            createdAt
+            updatedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        employees {
+          items {
+            id
+            name
+            email
+            phone
+            pin
+            type
+            agencyID
+            officeID
+            status
+         
+            lastConnection
+            createdAt
+            updatedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        bookings {
+          items {
+            id
+            status
+            code
+            agencyID
+            officeID
+            departureCity
+            arrivalCity
+            stock
+            price
+            percentage
+            createdBy
+            driver
+            transport
+            transportParking
+            transportFeatures
+     
+            createdAt
+            updatedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
     }
   }
 `;

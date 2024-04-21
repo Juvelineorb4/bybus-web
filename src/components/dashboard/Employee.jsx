@@ -48,7 +48,6 @@ const Dashboard = ({ dataResult, userType }) => {
         id: dataResult?.id,
       },
     });
-    // console.log(dataResult.id)
 
     setData(list?.data?.getEmployee);
 
@@ -61,9 +60,24 @@ const Dashboard = ({ dataResult, userType }) => {
           nextToken,
         },
       });
-
+      console.log("Se hizo una consulta");
       const items = response.data.getBookingbyAgencyID.items;
       result.push(...items);
+
+      // Actualiza dataTravels aquí
+      let aprobados = result.filter((obj) => obj.status === "AVAILABLE");
+      let cancelados = result.filter((obj) => obj.status !== "AVAILABLE");
+      aprobados.sort(
+        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+      );
+      cancelados.sort(
+        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+      );
+      let resultado = [...aprobados, ...cancelados];
+      let arrayFilter = resultado.filter(
+        (objeto) => objeto.officeID === dataResult.officeID
+      );
+      setDataTravels(arrayFilter);
 
       if (response.data.getBookingbyAgencyID.nextToken) {
         return fetchAllBookings(
@@ -75,27 +89,7 @@ const Dashboard = ({ dataResult, userType }) => {
       return result;
     };
 
-    const allBookings = await fetchAllBookings();
-    
-    // let array = allBookings.sort(
-    //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    // );
-    let aprobados = allBookings.filter((obj) => obj.status === "AVAILABLE");
-    let cancelados = allBookings.filter((obj) => obj.status !== "AVAILABLE");
-    console.log("aprobados:", aprobados);
-    console.log("cancelados:", aprobados);
-    console.log("todos:", allBookings);
-    aprobados.sort(
-      (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    );
-    cancelados.sort(
-      (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    );
-    let resultado = [...aprobados, ...cancelados];
-    let arrayFilter = resultado.filter(
-      (objeto) => objeto.officeID === dataResult.officeID
-    );
-    setDataTravels(arrayFilter);
+    await fetchAllBookings();
   };
 
   const Travels = async () => {
@@ -116,10 +110,7 @@ const Dashboard = ({ dataResult, userType }) => {
       result.push(...items);
 
       if (response.data.listOrderDetails.nextToken) {
-        return fetchAllOrders(
-          response.data.listOrderDetails.nextToken,
-          result
-        );
+        return fetchAllOrders(response.data.listOrderDetails.nextToken, result);
       }
 
       return result;
@@ -127,7 +118,6 @@ const Dashboard = ({ dataResult, userType }) => {
     const allOrders = await fetchAllOrders();
     console.log(allOrders);
     setDataOrders(allOrders);
-
   };
 
   useEffect(() => {

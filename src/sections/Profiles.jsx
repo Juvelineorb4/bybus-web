@@ -10,14 +10,18 @@ import { TextField, Button, CircularProgress } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import { Auth, API } from "aws-amplify";
-import { getAgency } from "@/graphql/custom/queries/profile";
+import {
+  getAgency,
+  getOffice,
+  listEmployeesByAgency,
+} from "@/graphql/custom/queries/profile";
 import {
   updateAgency,
   updateEmployee,
 } from "@/graphql/custom/mutations/profile";
 import { useRouter } from "next/router";
 import { useUser } from "@/context/UserContext";
-import { getOffice, listOffices } from "@/graphql/queries";
+import { listOffices } from "@/graphql/queries";
 
 const Profiles = ({ error }) => {
   const router = useRouter();
@@ -53,19 +57,42 @@ const Profiles = ({ error }) => {
   // buscar empleados de dicha agencia
   const fetchEmployees = async () => {
     try {
-      const employees = await API.graphql({
+      const dataAgency = await API.graphql({
         query: getAgency,
         authMode: "AMAZON_COGNITO_USER_POOLS",
         variables: {
           id: userAuth?.attributes["custom:agencyID"],
         },
       });
-      setAgency(employees.data.getAgency);
-      console.log(employees.data.getAgency);
-      const newEmployees = employees.data.getAgency.employees.items.filter(
-        (item) => item.type === "OFFICE"
-      );
-      setEmployees(newEmployees);
+
+      const fetchAllEmployess = async (nextToken, result = []) => {
+        const response = await API.graphql({
+          query: listEmployeesByAgency,
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+          variables: {
+            agencyID: userAuth?.attributes["custom:agencyID"],
+            filter: {
+              type: { eq: "OFFICE" },
+            },
+          },
+        });
+
+        const items = response.data.listEmployeesByAgency.items;
+        result.push(...items);
+
+        if (response.data.listEmployeesByAgency.nextToken) {
+          return fetchAllEmployess(
+            response.data.listEmployeesByAgency.nextToken,
+            result
+          );
+        }
+
+        return result;
+      };
+
+      const allEmployess = await fetchAllEmployess();
+      setAgency(dataAgency.data.getAgency);
+      setEmployees(allEmployess);
     } catch (error) {
       console.error(error);
     }
@@ -362,9 +389,15 @@ const AccountManager = ({ onHandleProfileClick, agencyID = null, image }) => {
       onClick={() => onHandleProfileClick(params)}
     >
       {image ? (
-        <Image src={image} alt="" width={100} height={100} style={{
-          borderRadius: 50
-        }} />
+        <Image
+          src={image}
+          alt=""
+          width={100}
+          height={100}
+          style={{
+            borderRadius: 50,
+          }}
+        />
       ) : (
         <ManageAccountsRoundedIcon
           sx={{ color: "rgba(0, 0, 0, 0.85)", height: 100, width: 100 }}

@@ -22,8 +22,6 @@ export { default as OfficeCreateForm } from "./OfficeCreateForm";
 export { default as OfficeUpdateForm } from "./OfficeUpdateForm";
 export { default as OrderDetailCreateForm } from "./OrderDetailCreateForm";
 export { default as OrderDetailUpdateForm } from "./OrderDetailUpdateForm";
-export { default as PagoMivilCreateForm } from "./PagoMivilCreateForm";
-export { default as PagoMivilUpdateForm } from "./PagoMivilUpdateForm";
 export { default as PaymentCreateForm } from "./PaymentCreateForm";
 export { default as PaymentUpdateForm } from "./PaymentUpdateForm";
 export { default as ScheduleBookingCreateForm } from "./ScheduleBookingCreateForm";

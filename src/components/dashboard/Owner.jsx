@@ -16,8 +16,10 @@ import {
   Autocomplete,
   Box,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import TableTravels from "../TableTravels";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const Dashboard = ({ dataResult, userType }) => {
   const [office, setOffice] = useState(false);
@@ -30,6 +32,7 @@ const Dashboard = ({ dataResult, userType }) => {
   const [officeList, setOfficeList] = useState("");
   const [officeListT, setOfficeListT] = useState("");
   const [employeeListT, setEmployeeListT] = useState("");
+  const [loadingTraverls, setLoadingTravels] = useState(false);
   const filteredData = dataOfficeTravel?.bookings?.items?.filter(
     (item) => item.createdBy === employeeListT
   );
@@ -82,6 +85,20 @@ const Dashboard = ({ dataResult, userType }) => {
       const items = response.data.listBookingbyOfficeID.items;
       result.push(...items);
 
+      let aprobados = result.filter((obj) => obj.status === "AVAILABLE");
+      let cancelados = result.filter((obj) => obj.status !== "AVAILABLE");
+      aprobados.sort(
+        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+      );
+      cancelados.sort(
+        (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
+      );
+      let resultado = [...aprobados, ...cancelados];
+      console.log(resultado);
+      // let arrayFilter = resultado.filter(
+      //   (objeto) => objeto.createdBy === dataResult.id
+      // );
+      setDataTravels(resultado);
       if (response.data.listBookingbyOfficeID.nextToken) {
         return fetchAllBookings(
           response.data.listBookingbyOfficeID.nextToken,
@@ -91,39 +108,21 @@ const Dashboard = ({ dataResult, userType }) => {
 
       return result;
     };
-
-    const allBookings = await fetchAllBookings();
-    console.log(allBookings);
-    // let array = allBookings.sort(
-    //   (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    // );
-    let aprobados = allBookings.filter((obj) => obj.status === "AVAILABLE");
-    let cancelados = allBookings.filter((obj) => obj.status !== "AVAILABLE");
-    console.log("aprobados:", aprobados);
-    console.log("cancelados:", cancelados);
-    console.log("todos:", allBookings);
-    aprobados.sort(
-      (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    );
-    cancelados.sort(
-      (a, b) => new Date(a.departure.date) - new Date(b.departure.date)
-    );
-    let resultado = [...aprobados, ...cancelados];
-    console.log(resultado);
-    // let arrayFilter = resultado.filter(
-    //   (objeto) => objeto.createdBy === dataResult.id
-    // );
-    setDataTravels(resultado);
-    console.log(list?.data?.getOffice)
+    setLoadingTravels(true);
+    await fetchAllBookings();
+    setLoadingTravels(false);
     setDataOfficeTravel(list?.data?.getOffice);
   };
 
   useEffect(() => {
     if (!office) Agency();
+  }, [office, employee]);
+  useEffect(() => {
     if (officeList) Employees();
+  }, [officeList]);
+  useEffect(() => {
     if (officeListT) OfficeTravels();
-  }, [office, employee, officeList, officeListT]);
-
+  }, [officeListT]);
   return (
     data && (
       <div className={styles.section}>
@@ -200,7 +199,7 @@ const Dashboard = ({ dataResult, userType }) => {
               >
                 <Autocomplete
                   disablePortal
-                  id="combo-box-demo"
+                  id="combo-box-demo1"
                   // getOptionLabel={(option) => option.rif}
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
@@ -224,14 +223,62 @@ const Dashboard = ({ dataResult, userType }) => {
                   )}
                 />
               </FormControl>
-              <FormControl
+              <div
+                style={{
+                  display: "flex",
+
+                  width: 400,
+                  justifyContent: "start",
+                  alignItems: "center",
+                }}
+              >
+                {loadingTraverls ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      paddingLeft: 20,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <CircularProgress />
+                    </div>
+                    <div style={{ paddingLeft: 10 }}>
+                      <p>Buscando Viajes ...</p>
+                    </div>
+                  </div>
+                ) : (
+                  dataTravels?.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        paddingLeft: 20,
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div>
+                        <CheckCircleIcon sx={{ color: "green" }} />
+                      </div>
+                      <div style={{ paddingLeft: 10 }}>
+                        <p>Viajes encontrados</p>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+
+              {/* <FormControl
                 sx={{
                   width: 400,
                 }}
               >
                 <Autocomplete
                   disablePortal
-                  id="combo-box-demo"
+                  id="combo-box-demo2"
                   // getOptionLabel={(option) => option.rif}
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
@@ -258,7 +305,7 @@ const Dashboard = ({ dataResult, userType }) => {
                     <TextField {...params} label="Seleccionar empleado" />
                   )}
                 />
-              </FormControl>
+              </FormControl> */}
             </div>
 
             {employeeListT ? (
@@ -267,7 +314,7 @@ const Dashboard = ({ dataResult, userType }) => {
               <TableTravels type={`dash`} rows={dataTravels} />
             ) : (
               <div className={styles.nothingTable}>
-                Selecciona una oficina o un empleado para ver sus viajes
+                Selecciona una oficina ver sus viajes
               </div>
             )}
           </div>

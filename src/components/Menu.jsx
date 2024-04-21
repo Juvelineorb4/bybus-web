@@ -30,7 +30,6 @@ const Menu = ({ ancho, dataResult }) => {
   const [openAgencies, setOpenAgencies] = useState(true);
   const [openUsers, setOpenUsers] = useState(true);
   const [imageAgency, setImageAgency] = useState(true);
-  console.log("aqiui", dataResult);
   const fecthImage = async () => {
     try {
       const imageUpload = await API.graphql({
@@ -57,7 +56,7 @@ const Menu = ({ ancho, dataResult }) => {
     Auth.signOut();
   };
   useEffect(() => {
-    fecthImage();
+    if (userAuth) fecthImage();
   }, []);
 
   return (

@@ -43,3 +43,52 @@ export const getBooking = /* GraphQL */ `
     }
   }
 `;
+
+export const getOffice = /* GraphQL */ `
+  query GetOffice($id: ID!) {
+    getOffice(id: $id) {
+      id
+      agencyID
+      name
+      state
+      city
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listEmployeesByAgency = /* GraphQL */ `
+  query ListEmployeesByAgency(
+    $agencyID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelEmployeeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listEmployeesByAgency(
+      agencyID: $agencyID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        name
+        email
+        phone
+        pin
+        type
+        agencyID
+        officeID
+        status
+        lastConnection
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
